@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Backend API with RAG
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: guru-agent-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=mistral:7b
+      - DEBUG=True
+    volumes:
+      - ./data/uploads:/app/data/uploads
+      - ./data/vectordb:/app/data/vectordb
+      - ./data/cache:/app/data/cache
+      - ./backend/app:/app/app  # Hot reload for development
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Frontend Next.js (Development Mode)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: guru-agent-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  # Persistent volumes for data
+  uploads:
+  vectordb:
+  cache:
+
+networks:
+  default:
+    name: guru-agent-network

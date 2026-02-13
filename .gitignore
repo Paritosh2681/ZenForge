@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+backend/.env
+
+# Node
+node_modules/
+.next/
+out/
+frontend/.env.local
+
+# Data & Models (local only)
+data/uploads/*
+data/vectordb/*
+data/cache/*
+models/*
+
+# Keep directory structure
+!data/uploads/.gitkeep
+!data/vectordb/.gitkeep
+!data/cache/.gitkeep
+!models/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
