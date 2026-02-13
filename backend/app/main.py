@@ -2,13 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import documents, chat
+from app.routers import documents, chat, multimodal
 
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="Local-first AI Learning Companion with RAG"
+    description="Local-first AI Learning Companion with RAG + Multimodal Features"
 )
 
 # CORS Configuration (allow frontend to communicate)
@@ -23,6 +23,7 @@ app.add_middleware(
 # Include routers
 app.include_router(documents.router)
 app.include_router(chat.router)
+app.include_router(multimodal.router)  # Phase 2: Multimodal features
 
 @app.get("/")
 async def root():
