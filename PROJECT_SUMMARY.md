@@ -493,7 +493,7 @@ User Query → Local Embedding → Local Search → Local LLM → Response
 
 ## Credits & Attribution
 
-**Built by:** Claude (Anthropic)
+**Built by:** Abhishek
 **Team:** ZenForge
 **Event:** AMD Slingshot Hackathon
 **Date:** February 2026
