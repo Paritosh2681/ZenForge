@@ -1,17 +1,27 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from datetime import datetime
 import uuid
+import logging
 
 from app.services.vector_store import VectorStore
 from app.services.llm_client import OllamaClient
+from app.services.conversation_manager import ConversationManager
+from app.services.context_window_manager import ContextWindowManager
 from app.models.schemas import ChatResponse, SourceChunk
+from app.config import settings
+
+logger = logging.getLogger(__name__)
+
 
 class RAGEngine:
-    """Orchestrates Retrieval-Augmented Generation pipeline"""
+    """Orchestrates Retrieval-Augmented Generation pipeline with conversation context (Phase 3)"""
 
     def __init__(self):
         self.vector_store = VectorStore()
         self.llm_client = OllamaClient()
+        # Phase 3: Conversation support
+        self.conversation_manager = ConversationManager()
+        self.context_manager = ContextWindowManager()
 
     async def query(
         self,
@@ -20,34 +30,77 @@ class RAGEngine:
         include_sources: bool = True,
         generate_diagram: bool = True
     ) -> ChatResponse:
-        """Process user query through RAG pipeline"""
+        """
+        Process user query through RAG pipeline with conversation context.
 
-        # Generate conversation ID if not provided
+        Phase 3 Enhancement: Now maintains conversation history and uses it for context.
+        """
+
+        # Generate conversation ID if not provided (backward compatibility)
         if not conversation_id:
             conversation_id = str(uuid.uuid4())
+            logger.warning("No conversation_id provided, creating new conversation")
+
+        # Phase 3: Load conversation history
+        conversation_history = []
+        try:
+            conversation = await self.conversation_manager.get_conversation(conversation_id)
+            if conversation:
+                conversation_history = conversation.messages
+                logger.debug(f"Loaded {len(conversation_history)} messages from conversation history")
+        except Exception as e:
+            logger.warning(f"Failed to load conversation history: {e}. Proceeding without history.")
 
         # Step 1: Retrieve relevant chunks from vector store
         retrieved_chunks = self.vector_store.query(user_query)
 
         if not retrieved_chunks:
             # No relevant context found
+            response_text = "I don't have enough information in my knowledge base to answer that question. Please upload relevant study materials first."
+
+            # Save messages even for no-context responses
+            try:
+                await self.conversation_manager.add_message(
+                    conversation_id=conversation_id,
+                    role="user",
+                    content=user_query
+                )
+                await self.conversation_manager.add_message(
+                    conversation_id=conversation_id,
+                    role="assistant",
+                    content=response_text
+                )
+            except Exception as e:
+                logger.warning(f"Failed to save messages: {e}")
+
             return ChatResponse(
-                response="I don't have enough information in my knowledge base to answer that question. Please upload relevant study materials first.",
+                response=response_text,
                 sources=[],
                 mermaid_diagram=None,
                 conversation_id=conversation_id,
                 timestamp=datetime.now()
             )
 
-        # Step 2: Extract context for LLM
+        # Step 2: Build conversation context window (Phase 3)
+        context_window = self.context_manager.build_context_window(
+            conversation_history=conversation_history,
+            rag_chunks=retrieved_chunks,
+            system_prompt=self._get_system_prompt()
+        )
+
+        # Extract RAG context texts
         context_texts = [chunk["content"] for chunk in retrieved_chunks]
 
-        # Step 3: Generate response using LLM with context
+        # Step 3: Generate response using LLM with full context (history + RAG)
         generation_result = await self.llm_client.generate_with_context(
             query=user_query,
             context_chunks=context_texts,
+            conversation_history=context_window.get('conversation_history', ''),
             generate_diagram=generate_diagram
         )
+
+        response_text = generation_result["response"]
+        mermaid_diagram = generation_result.get("mermaid_diagram")
 
         # Step 4: Format sources
         sources = []
@@ -60,14 +113,69 @@ class RAGEngine:
                     similarity_score=round(chunk["similarity_score"], 3)
                 ))
 
+        # Phase 3: Save messages to conversation history
+        try:
+            # Save user message
+            await self.conversation_manager.add_message(
+                conversation_id=conversation_id,
+                role="user",
+                content=user_query,
+                token_count=self.context_manager.count_tokens(user_query)
+            )
+
+            # Save assistant message with metadata
+            await self.conversation_manager.add_message(
+                conversation_id=conversation_id,
+                role="assistant",
+                content=response_text,
+                token_count=self.context_manager.count_tokens(response_text),
+                metadata={
+                    "sources": [s.dict() for s in sources],
+                    "mermaid_diagram": mermaid_diagram,
+                    "query_rewritten": False  # Will be True when query rewriter is added
+                }
+            )
+
+            # Link documents to conversation
+            for chunk in retrieved_chunks:
+                document_id = chunk["metadata"].get("document_id")
+                if document_id:
+                    await self.conversation_manager.link_document(
+                        conversation_id=conversation_id,
+                        document_id=document_id
+                    )
+
+            logger.info(f"Saved conversation turn to {conversation_id}")
+
+        except Exception as e:
+            logger.error(f"Failed to save conversation: {e}")
+            # Continue anyway - user still gets response
+
         # Step 5: Build response
         return ChatResponse(
-            response=generation_result["response"],
+            response=response_text,
             sources=sources,
-            mermaid_diagram=generation_result.get("mermaid_diagram"),
+            mermaid_diagram=mermaid_diagram,
             conversation_id=conversation_id,
             timestamp=datetime.now()
         )
+
+    def _get_system_prompt(self) -> str:
+        """Get system prompt for LLM"""
+        return """You are Guru-Agent, an empathetic AI learning companion designed to help students learn effectively.
+
+Your approach:
+1. Use the Socratic method - guide students to discover answers through thoughtful questions
+2. Provide clear, concise explanations tailored to the student's level
+3. Use examples and analogies to clarify complex concepts
+4. Encourage critical thinking and active learning
+5. When appropriate, generate Mermaid diagrams to visualize concepts
+
+Remember:
+- Be patient and supportive
+- Acknowledge when you don't know something
+- Use the provided context from study materials
+- Consider the conversation history to maintain context"""
 
     async def index_document(self, chunks: List[Dict[str, Any]]) -> int:
         """Index document chunks into vector store"""

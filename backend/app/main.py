@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import documents, chat, multimodal
+from app.routers import documents, chat, multimodal, conversations
+from app.services.database import init_database
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -24,6 +25,12 @@ app.add_middleware(
 app.include_router(documents.router)
 app.include_router(chat.router)
 app.include_router(multimodal.router)  # Phase 2: Multimodal features
+app.include_router(conversations.router)  # Phase 3: Conversation management
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on application startup"""
+    await init_database()
 
 @app.get("/")
 async def root():
