@@ -20,10 +20,10 @@ WORKDIR /app
 # Copy requirements first (for caching)
 COPY requirements.txt requirements-phase2.txt ./
 
-# Install Python dependencies (Phase 1 + Phase 2)
-RUN pip install --no-cache-dir --upgrade pip && \
+# Install Python dependencies (Phase 1 required, Phase 2 optional)
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir -r requirements-phase2.txt
+    (pip install --no-cache-dir -r requirements-phase2.txt 2>&1 | tee /tmp/phase2-install.log || echo "Phase 2 multimodal dependencies skipped - Phase 4 will work without them")
 
 # Copy application code
 COPY app/ ./app/

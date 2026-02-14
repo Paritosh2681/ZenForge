@@ -1,4 +1,8 @@
-from pydantic_settings import BaseSettings
+try:
+    from pydantic_settings import BaseSettings
+except ImportError:
+    # Fallback for pydantic v1
+    from pydantic import BaseSettings
 from pathlib import Path
 
 class Settings(BaseSettings):
@@ -36,6 +40,7 @@ class Settings(BaseSettings):
 
     # Phase 3: Conversation Storage
     CONVERSATION_DB_PATH: Path = BASE_DIR / "data" / "conversations.db"
+    DATABASE_PATH: Path = BASE_DIR / "data" / "conversations.db"  # Alias for Phase 4
 
     # Phase 3: Context Window Management
     MAX_CONTEXT_TOKENS: int = 3000
