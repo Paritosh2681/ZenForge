@@ -34,6 +34,19 @@ class Settings(BaseSettings):
     TOP_K_RETRIEVAL: int = 4
     SIMILARITY_THRESHOLD: float = 0.7
 
+    # Phase 3: Conversation Storage
+    CONVERSATION_DB_PATH: Path = BASE_DIR / "data" / "conversations.db"
+
+    # Phase 3: Context Window Management
+    MAX_CONTEXT_TOKENS: int = 3000
+    CONVERSATION_WINDOW_MESSAGES: int = 10
+    SUMMARIZATION_TRIGGER: int = 20  # messages
+    TOKEN_ESTIMATION_RATIO: float = 4.0  # chars per token
+
+    # Phase 3: Query Rewriting
+    ENABLE_QUERY_REWRITING: bool = True
+    QUERY_REWRITE_CONTEXT_MESSAGES: int = 3
+
     class Config:
         env_file = ".env"
         case_sensitive = True
