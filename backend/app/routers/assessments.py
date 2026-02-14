@@ -13,6 +13,7 @@ from app.models.quiz_schemas import (
 )
 from app.services.assessment_generator import AssessmentGenerator
 from app.services.quiz_manager import QuizManager
+from app.services.mastery_tracker import MasteryTracker
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ router = APIRouter(prefix="/assessments", tags=["assessments"])
 # Initialize services
 assessment_generator = AssessmentGenerator()
 quiz_manager = QuizManager()
+mastery_tracker = MasteryTracker()
 
 
 @router.post("/generate")
@@ -219,6 +221,13 @@ async def complete_quiz(session_id: str) -> QuizResults:
     """Complete quiz session and get results"""
     try:
         results = await quiz_manager.complete_quiz_session(session_id)
+
+        # Update mastery for topics in background
+        try:
+            await mastery_tracker.update_from_quiz_session(session_id)
+            logger.info(f"Updated mastery for session {session_id}")
+        except Exception as mastery_err:
+            logger.warning(f"Failed to update mastery (non-blocking): {mastery_err}")
 
         logger.info(f"Completed quiz session {session_id}: {results.score}/{results.max_score}")
         return results
