@@ -37,3 +37,10 @@ models/*
 # Logs
 *.log
 logs/
+
+# Temporary test files
+tmpclaude-*-cwd/
+test_*.json
+test_*.txt
+test_*.ps1
+chat_response.json
