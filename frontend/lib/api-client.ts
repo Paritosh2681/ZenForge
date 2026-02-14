@@ -7,6 +7,17 @@ import type {
   ConversationUpdateRequest,
   ContextInfo,
 } from '@/types/conversation';
+import type {
+  Quiz,
+  QuizDetail,
+  QuizList,
+  QuizCreateRequest,
+  QuizSession,
+  QuizSessionStart,
+  AnswerSubmit,
+  QuestionResponse,
+  QuizResults,
+} from '@/types/quiz';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
@@ -140,6 +151,65 @@ export const api = {
   async getConversationContext(conversationId: string): Promise<ContextInfo> {
     const response = await apiClient.get<ContextInfo>(
       `/conversations/${conversationId}/context`
+    );
+    return response.data;
+  },
+
+  // Phase 4: Assessment & Quiz endpoints
+  async generateQuiz(request: QuizCreateRequest): Promise<Quiz> {
+    const response = await apiClient.post<Quiz>('/assessments/generate', request);
+    return response.data;
+  },
+
+  async listQuizzes(limit?: number, offset?: number): Promise<QuizList> {
+    const params = new URLSearchParams();
+    if (limit !== undefined) params.append('limit', limit.toString());
+    if (offset !== undefined) params.append('offset', offset.toString());
+
+    const response = await apiClient.get<QuizList>(
+      `/assessments/quizzes?${params.toString()}`
+    );
+    return response.data;
+  },
+
+  async getQuiz(quizId: string, includeAnswers: boolean = false): Promise<QuizDetail> {
+    const params = new URLSearchParams();
+    if (includeAnswers) params.append('include_answers', 'true');
+
+    const response = await apiClient.get<QuizDetail>(
+      `/assessments/quizzes/${quizId}?${params.toString()}`
+    );
+    return response.data;
+  },
+
+  async deleteQuiz(quizId: string): Promise<{ success: boolean }> {
+    const response = await apiClient.delete(`/assessments/quizzes/${quizId}`);
+    return response.data;
+  },
+
+  async startQuizSession(request: QuizSessionStart): Promise<QuizSession> {
+    const response = await apiClient.post<QuizSession>('/assessments/sessions', request);
+    return response.data;
+  },
+
+  async submitAnswer(sessionId: string, answer: AnswerSubmit): Promise<QuestionResponse> {
+    const response = await apiClient.post<QuestionResponse>(
+      `/assessments/sessions/${sessionId}/submit`,
+      answer
+    );
+    return response.data;
+  },
+
+  async completeQuiz(sessionId: string): Promise<QuizResults> {
+    const response = await apiClient.post<QuizResults>(
+      `/assessments/sessions/${sessionId}/complete`
+    );
+    return response.data;
+  },
+
+  async getQuizResults(sessionId: string): Promise<QuizResults> {
+    const response = await apiClient.get<QuizResults>(
+      `/assessments/sessions/${sessionId}/results`
     );
     return response.data;
   },
