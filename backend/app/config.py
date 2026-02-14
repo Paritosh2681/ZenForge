@@ -47,6 +47,26 @@ class Settings(BaseSettings):
     ENABLE_QUERY_REWRITING: bool = True
     QUERY_REWRITE_CONTEXT_MESSAGES: int = 3
 
+    # Phase 4: Assessment & Analytics
+    QUIZ_DEFAULT_QUESTIONS: int = 10
+    QUIZ_MIN_QUESTIONS: int = 5
+    QUIZ_MAX_QUESTIONS: int = 50
+    QUIZ_DIFFICULTY_LEVELS: list = ['easy', 'medium', 'hard', 'mixed']
+
+    # Topic extraction
+    TOPIC_EXTRACTION_CONFIDENCE: float = 0.6
+    MIN_TOPIC_MENTIONS: int = 2
+
+    # Mastery levels
+    MASTERY_THRESHOLD_BEGINNER: float = 0.3
+    MASTERY_THRESHOLD_INTERMEDIATE: float = 0.6
+    MASTERY_THRESHOLD_ADVANCED: float = 0.9
+
+    # Spaced repetition
+    SR_INTERVAL_BASE: int = 1  # days
+    SR_INTERVAL_MULTIPLIER: float = 2.5
+    SR_MIN_EASINESS: float = 1.3
+
     class Config:
         env_file = ".env"
         case_sensitive = True

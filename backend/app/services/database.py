@@ -55,11 +55,92 @@ CREATE TABLE IF NOT EXISTS context_summaries (
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 
+-- Phase 4: Quizzes
+CREATE TABLE IF NOT EXISTS quizzes (
+    id TEXT PRIMARY KEY,
+    title TEXT,
+    description TEXT,
+    document_ids TEXT,
+    difficulty TEXT CHECK(difficulty IN ('easy', 'medium', 'hard', 'mixed')),
+    question_count INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata TEXT
+);
+
+-- Phase 4: Questions
+CREATE TABLE IF NOT EXISTS questions (
+    id TEXT PRIMARY KEY,
+    quiz_id TEXT NOT NULL,
+    question_text TEXT NOT NULL,
+    question_type TEXT CHECK(question_type IN ('multiple_choice', 'true_false', 'short_answer')),
+    difficulty TEXT,
+    topic TEXT,
+    options TEXT,
+    correct_answer TEXT,
+    explanation TEXT,
+    points INTEGER DEFAULT 1,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id) ON DELETE CASCADE
+);
+
+-- Phase 4: Quiz Sessions
+CREATE TABLE IF NOT EXISTS quiz_sessions (
+    id TEXT PRIMARY KEY,
+    quiz_id TEXT NOT NULL,
+    conversation_id TEXT,
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    score INTEGER,
+    max_score INTEGER,
+    time_taken INTEGER,
+    FOREIGN KEY (quiz_id) REFERENCES quizzes(id)
+);
+
+-- Phase 4: Quiz Responses
+CREATE TABLE IF NOT EXISTS quiz_responses (
+    id TEXT PRIMARY KEY,
+    session_id TEXT NOT NULL,
+    question_id TEXT NOT NULL,
+    user_answer TEXT,
+    is_correct BOOLEAN,
+    time_taken INTEGER,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES quiz_sessions(id) ON DELETE CASCADE,
+    FOREIGN KEY (question_id) REFERENCES questions(id)
+);
+
+-- Phase 4: Topics (for knowledge tracking)
+CREATE TABLE IF NOT EXISTS topics (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    category TEXT,
+    document_ids TEXT,
+    concept_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Phase 4: Topic Mastery
+CREATE TABLE IF NOT EXISTS topic_mastery (
+    id TEXT PRIMARY KEY,
+    topic_id TEXT NOT NULL,
+    conversation_id TEXT,
+    mastery_level REAL DEFAULT 0.0,
+    questions_answered INTEGER DEFAULT 0,
+    correct_count INTEGER DEFAULT 0,
+    last_reviewed TIMESTAMP,
+    next_review TIMESTAMP,
+    easiness_factor REAL DEFAULT 2.5,
+    FOREIGN KEY (topic_id) REFERENCES topics(id)
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
 CREATE INDEX IF NOT EXISTS idx_conversations_updated ON conversations(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_summaries_conversation ON context_summaries(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_questions_quiz ON questions(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_sessions_quiz ON quiz_sessions(quiz_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_responses_session ON quiz_responses(session_id);
+CREATE INDEX IF NOT EXISTS idx_topic_mastery_topic ON topic_mastery(topic_id);
 """
 
 
