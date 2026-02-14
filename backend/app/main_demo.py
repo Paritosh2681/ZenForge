@@ -5,6 +5,8 @@ Simplified version for testing architecture without heavy dependencies
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 from pydantic import BaseModel
 from datetime import datetime
 from typing import List, Optional
@@ -15,20 +17,23 @@ import httpx
 documents_db = {}
 conversation_history = []
 
+# Custom CORS middleware for local development
+class CustomCORSMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "*"
+        return response
+
 app = FastAPI(
     title="Guru-Agent DEMO",
     version="0.1.0-demo",
     description="Demo version - Full RAG with dependencies coming soon!"
 )
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Add custom CORS middleware
+app.add_middleware(CustomCORSMiddleware)
 
 # Schemas
 class DocumentUploadResponse(BaseModel):
