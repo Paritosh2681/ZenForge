@@ -1,234 +1,426 @@
-# Guru-Agent (Project Cortex) - Phase 1
+# GuruCortex - Active Cognitive Learning OS
 
-## Active Cognitive Learning OS - Local RAG Foundation
+**A fully local, privacy-first AI learning companion powered by Ollama + Mistral-7B**
 
-**Team:** ZenForge
-**Event:** AMD Slingshot Hackathon
-**Version:** 0.1.0 - Phase 1
-**Status:** Core Foundation Complete
-**Privacy:** 100% Local Execution
+GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizzes, mastery tracking, code execution, podcast-style audio lessons, and gamification - all running 100% on your machine with zero cloud dependencies.
+
+![Next.js](https://img.shields.io/badge/Next.js-14-black?logo=next.js)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110-009688?logo=fastapi)
+![Ollama](https://img.shields.io/badge/Ollama-Mistral--7B-blue)
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white)
 
 ---
 
-## Overview
+## Features
 
-Guru-Agent is a local-first AI learning companion that provides personalized, empathetic educational support without relying on cloud services. Phase 1 establishes the core RAG (Retrieval-Augmented Generation) pipeline with generative UI capabilities.
+### Chat & RAG Pipeline
+- Upload PDFs, DOCX, PPTX, TXT files and ask questions about them
+- Context-aware responses with source citations
+- Auto-generated Mermaid diagrams for visual explanations
+- Conversation history with context window management
 
-### Phase 1 Features
+### Adaptive Assessments
+- AI-generated quizzes from your study materials
+- Multiple choice, true/false, short answer question types
+- Difficulty levels: easy, medium, hard, mixed
+- Detailed results with per-question feedback
 
-✅ **Document Processing**: Upload and process PDF, PowerPoint, and Word documents
-✅ **Local Vector Storage**: ChromaDB with sentence-transformers embeddings
-✅ **Local LLM Inference**: Ollama integration (Mistral-7B)
-✅ **Generative UI**: Automatic Mermaid.js diagram generation
-✅ **Next.js Frontend**: Modern, responsive chat interface
-✅ **Zero Cloud Dependency**: All processing happens locally
+### Learning Analytics & Mastery
+- SM-2 spaced repetition algorithm for optimal review scheduling
+- Topic mastery tracking across all study sessions
+- Performance trends, quiz history, accuracy breakdowns
+- Personalized study recommendations
+
+### Code Sandbox
+- Execute Python code directly in the browser
+- Built-in templates (Fibonacci, sorting, math, statistics)
+- Execution history saved per session
+- Security-sandboxed with dangerous import blocking
+
+### Protege Effect (Teach-Back Mode)
+- AI plays a confused student - you teach the concept
+- Evaluated on clarity, accuracy, engagement, depth, examples
+- Letter grade (A-D) with specific feedback
+- Strengthens understanding through active recall
+
+### Podcast-Style Audio Learning
+- AI generates HOST/EXPERT dialogue scripts from your materials
+- Browser-based text-to-speech playback with different voices
+- Interactive transcript with clickable segments
+- Multiple styles: conversational, academic, storytelling
+
+### Study Planner
+- Create and manage study plans with scheduling
+- Auto-generate plans from spaced repetition data
+- Track completion status (pending, in progress, completed, skipped)
+- Duration tracking and daily overview
+
+### Gamification
+- 12 achievement badges across 5 categories
+- Level progression system based on activity
+- Streak tracking for daily engagement
+- Categories: upload, quiz, streak, mastery, exploration
+
+### Attention Monitoring
+- Webcam-based attention detection using MediaPipe
+- Real-time engagement scoring
+- Smart intervention suggestions when attention drifts
+- WebSocket streaming for live monitoring
+
+### Accessibility
+- OpenDyslexic font toggle for dyslexia support
+- High contrast mode (black/white/yellow)
+- Adjustable font sizes (normal, large, extra-large)
+- Reduced motion mode
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **LLM** | Ollama + Mistral-7B (local GPU) |
+| **Embeddings** | sentence-transformers (all-MiniLM-L6-v2) |
+| **Vector DB** | ChromaDB |
+| **Database** | SQLite (aiosqlite) |
+| **Backend** | FastAPI + Uvicorn |
+| **Frontend** | Next.js 14 + TypeScript + Tailwind CSS |
+| **Animations** | Framer Motion |
+| **Diagrams** | Mermaid.js |
+| **Attention** | OpenCV + MediaPipe |
+| **TTS** | pyttsx3 + Browser SpeechSynthesis API |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────┐
-│   Next.js UI    │
-│  (Port 3000)    │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│  FastAPI Backend│
-│  (Port 8000)    │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
-┌────────┐ ┌──────────┐
-│ChromaDB│ │  Ollama  │
-│ Vector │ │   LLM    │
-│  Store │ │(Port     │
-└────────┘ │ 11434)   │
-           └──────────┘
+                    +------------------+
+                    |   Browser        |
+                    |   localhost:3000  |
+                    +--------+---------+
+                             |
+                    +--------v---------+
+                    |   Next.js 14     |
+                    |   (Frontend)     |
+                    +--------+---------+
+                             |  Axios
+                    +--------v---------+
+                    |   FastAPI        |
+                    |   localhost:8000  |
+                    +---+----+----+----+
+                        |    |    |
+              +---------+  +-+    +----------+
+              |            |                 |
+     +--------v---+  +----v------+  +-------v-------+
+     |  ChromaDB  |  |  SQLite   |  |    Ollama     |
+     | (Vectors)  |  | (13 tbl)  |  | (Mistral-7B)  |
+     +------------+  +-----------+  +---------------+
 ```
 
 ---
 
 ## Quick Start
 
-### 🐳 Option 1: Docker (Recommended - Works Perfectly!)
-
-**Requirements**: Docker Desktop installed ([Get Docker](https://docs.docker.com/get-docker/))
-
-```bash
-# Windows
-scripts\docker-start.bat
-
-# Linux/Mac
-chmod +x scripts/docker-start.sh
-./scripts/docker-start.sh
-```
-
-**That's it!** Full RAG system with ChromaDB, embeddings, and document processing. No dependency issues!
-
-See [docs/DOCKER_SETUP.md](docs/DOCKER_SETUP.md) for details.
-
----
-
-### 💻 Option 2: Native Installation (Advanced)
-
 ### Prerequisites
 
-1. **Python 3.10+**
-2. **Node.js 18+**
-3. **Ollama** (for local LLM)
+- **Python 3.10+**
+- **Node.js 18+**
+- **Ollama** - [Download](https://ollama.com/download)
+- **NVIDIA GPU** recommended (works on CPU too, slower)
 
 ### Installation
 
-#### 1. Install Ollama & Pull Model
-
 ```bash
-# Install Ollama (visit https://ollama.ai for your OS)
-curl -fsSL https://ollama.ai/install.sh | sh
+# 1. Clone the repository
+git clone https://github.com/ABHISHEK-DBZ/gurucortex.git
+cd gurucortex
 
-# Pull Mistral model
+# 2. Install Ollama and pull the model
 ollama pull mistral:7b
 
-# Verify
-ollama list
-```
-
-#### 2. Backend Setup
-
-```bash
+# 3. Install backend dependencies
 cd backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate (Windows: venv\Scripts\activate | Mac/Linux: source venv/bin/activate)
-source venv/bin/activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Copy environment file
 cp .env.example .env
-```
 
-#### 3. Frontend Setup
-
-```bash
-cd frontend
-
-# Install dependencies
+# 4. Install frontend dependencies
+cd ../frontend
 npm install
-
-# Copy environment file
-cp .env.local.example .env.local
 ```
 
-### Running the Application
+### Run
 
-**Terminal 1: Backend**
+**Option A: One-click (Windows)**
+```
+Double-click start.bat
+```
+
+**Option B: Manual**
 ```bash
+# Terminal 1: Start Ollama
+ollama serve
+
+# Terminal 2: Start Backend
 cd backend
-source venv/bin/activate
-python -m app.main
-```
-Backend: `http://localhost:8000` | Docs: `http://localhost:8000/docs`
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-**Terminal 2: Frontend**
-```bash
+# Terminal 3: Start Frontend
 cd frontend
 npm run dev
 ```
-Frontend: `http://localhost:3000`
+
+Open **http://localhost:3000/dashboard**
+
+### Stop
+```
+Double-click stop.bat
+```
 
 ---
 
-## Usage
+## API Endpoints
 
-1. **Upload Documents**: Click "Upload Documents" and select PDF/PPTX/DOCX files
-2. **Ask Questions**: Type your question about the uploaded materials
-3. **View Responses**: Get AI-generated answers with source citations and auto-generated diagrams
+### Chat & Documents
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/chat/query` | Send question to RAG pipeline |
+| `GET` | `/chat/health` | System health check |
+| `POST` | `/documents/upload` | Upload study material |
+| `GET` | `/documents/count` | Count indexed chunks |
+
+### Conversations
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/conversations` | List all conversations |
+| `POST` | `/conversations` | Create new conversation |
+| `GET` | `/conversations/{id}` | Get conversation with messages |
+| `PATCH` | `/conversations/{id}` | Update title/archive |
+| `DELETE` | `/conversations/{id}` | Delete conversation |
+
+### Assessments
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/assessments/generate` | Generate quiz from documents |
+| `GET` | `/assessments/quizzes` | List all quizzes |
+| `POST` | `/assessments/sessions` | Start quiz session |
+| `POST` | `/assessments/sessions/{id}/submit` | Submit answer |
+| `POST` | `/assessments/sessions/{id}/complete` | Finish quiz |
+
+### Analytics
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/analytics/stats` | Overall learning statistics |
+| `GET` | `/analytics/mastery` | Topic mastery levels |
+| `GET` | `/analytics/mastery/review` | Topics due for review |
+| `GET` | `/analytics/recommendations` | Study recommendations |
+
+### Code Execution
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/code/execute` | Run Python code (sandboxed) |
+| `GET` | `/code/history` | Execution history |
+
+### Protege Effect
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/protege/start` | Start teach-back session |
+| `POST` | `/protege/respond` | AI responds as student |
+| `POST` | `/protege/evaluate` | Grade teaching quality |
+
+### Podcast
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/podcast/generate-script` | Generate audio script |
+| `POST` | `/podcast/synthesize` | Convert to audio |
+
+### Study Planner
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/planner/plans` | Get study plans |
+| `POST` | `/planner/plans` | Create plan |
+| `PATCH` | `/planner/plans/{id}` | Update plan status |
+| `POST` | `/planner/generate` | Auto-generate plans |
+
+### Gamification
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/gamification/badges` | All badges with status |
+| `POST` | `/gamification/check-badges` | Check & award badges |
+| `GET` | `/gamification/stats` | Level, streak, stats |
+
+### Multimodal
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/multimodal/analyze-attention` | Analyze webcam frame |
+| `POST` | `/multimodal/transcribe-voice` | Voice to text |
+| `POST` | `/multimodal/synthesize-speech` | Text to speech |
+| `WS` | `/multimodal/attention-stream` | Real-time attention |
+
+Full interactive API docs at **http://localhost:8000/docs**
 
 ---
 
 ## Project Structure
 
 ```
-ZenForge/
-├── backend/                     # Python FastAPI
+gurucortex/
+├── backend/
 │   ├── app/
-│   │   ├── main.py             # Entry point
-│   │   ├── config.py           # Configuration
-│   │   ├── models/             # Pydantic schemas
-│   │   ├── services/           # Core logic (RAG, LLM, Vector DB)
-│   │   └── routers/            # API endpoints
-│   └── requirements.txt
-│
-├── frontend/                    # Next.js TypeScript
-│   ├── app/                    # App router
-│   ├── components/             # React components
-│   ├── lib/                    # API client
-│   └── package.json
-│
-└── data/                       # Local storage (gitignored)
-    ├── uploads/                # User documents
-    ├── vectordb/               # ChromaDB
-    └── cache/                  # Temp files
+│   │   ├── main.py                    # FastAPI entry point
+│   │   ├── config.py                  # Settings & configuration
+│   │   ├── models/
+│   │   │   └── schemas.py             # Pydantic models
+│   │   ├── routers/
+│   │   │   ├── chat.py                # RAG query endpoints
+│   │   │   ├── documents.py           # Document upload & processing
+│   │   │   ├── conversations.py       # Conversation management
+│   │   │   ├── assessments.py         # Quiz generation & sessions
+│   │   │   ├── analytics.py           # Learning analytics & mastery
+│   │   │   ├── code_execution.py      # Sandboxed Python execution
+│   │   │   ├── podcast.py             # Audio script generation
+│   │   │   ├── protege.py             # Teach-back evaluation
+│   │   │   ├── study_planner.py       # Study plan CRUD
+│   │   │   ├── gamification.py        # Badges & achievements
+│   │   │   └── multimodal.py          # Attention, voice, TTS
+│   │   └── services/
+│   │       ├── rag_engine.py          # RAG orchestration
+│   │       ├── vector_store.py        # ChromaDB operations
+│   │       ├── llm_client.py          # Ollama API client
+│   │       ├── document_processor.py  # Text extraction & chunking
+│   │       ├── database.py            # SQLite schema (13 tables)
+│   │       ├── conversation_manager.py
+│   │       ├── context_window_manager.py
+│   │       ├── assessment_generator.py
+│   │       ├── quiz_manager.py
+│   │       ├── topic_extractor.py
+│   │       ├── mastery_tracker.py
+│   │       ├── analytics_engine.py
+│   │       ├── attention_tracker.py
+│   │       ├── voice_input.py
+│   │       └── text_to_speech.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── .env.example
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx                   # Landing page
+│   │   ├── layout.tsx                 # Root layout
+│   │   ├── globals.css                # Styles + accessibility
+│   │   └── dashboard/
+│   │       └── page.tsx               # Main dashboard (10 tabs)
+│   ├── components/
+│   │   ├── ChatInterface.tsx          # RAG chat
+│   │   ├── DocumentUploader.tsx       # File upload
+│   │   ├── CodeSandbox.tsx            # Python editor
+│   │   ├── AssessmentHub.tsx          # Quiz management
+│   │   ├── QuizInterface.tsx          # Quiz taking
+│   │   ├── LearningDashboard.tsx      # Analytics
+│   │   ├── PodcastPlayer.tsx          # Audio lessons
+│   │   ├── ProtegeMode.tsx            # Teach-back
+│   │   ├── StudyPlanner.tsx           # Study plans
+│   │   ├── BadgesDisplay.tsx          # Gamification
+│   │   ├── AttentionMonitor.tsx       # Focus tracking
+│   │   ├── VoiceInput.tsx             # Voice input
+│   │   ├── AccessibilityToggle.tsx    # Accessibility
+│   │   └── MermaidRenderer.tsx        # Diagram rendering
+│   ├── lib/api-client.ts             # API wrapper
+│   ├── types/                         # TypeScript definitions
+│   ├── public/fonts/                  # Bundled fonts (offline)
+│   ├── package.json
+│   └── tailwind.config.js
+├── docker-compose.yml
+├── start.bat                          # Windows startup
+├── stop.bat                           # Windows shutdown
+├── deploy.sh                          # Linux/Mac deploy
+└── deploy.bat                         # Windows Docker deploy
 ```
+
+---
+
+## Database Schema
+
+SQLite with 13 tables:
+
+| Table | Purpose |
+|-------|---------|
+| `conversations` | Chat sessions with metadata |
+| `messages` | Individual chat messages |
+| `conversation_documents` | Document-conversation links |
+| `context_summaries` | Compressed conversation context |
+| `quizzes` | Generated quiz definitions |
+| `questions` | Quiz questions with answers |
+| `quiz_sessions` | Active quiz attempts |
+| `quiz_responses` | Student answers per session |
+| `topics` | Extracted learning topics |
+| `topic_mastery` | SM-2 spaced repetition state |
+| `badges` | Earned achievement badges |
+| `study_plans` | Scheduled study sessions |
+| `code_executions` | Code sandbox history |
 
 ---
 
 ## Configuration
 
-### Backend (`.env`)
+Edit `backend/.env`:
 
-```bash
+```env
+OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=mistral:7b
 EMBEDDING_MODEL=all-MiniLM-L6-v2
 CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
 TOP_K_RETRIEVAL=4
-```
-
-### Frontend (`.env.local`)
-
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000
+SIMILARITY_THRESHOLD=0.3
 ```
 
 ---
 
-## Troubleshooting
+## Docker Deployment
 
-**Ollama Offline**
 ```bash
+# Start Ollama on host first
 ollama serve
-ollama pull mistral:7b
+
+# Build and run
+docker compose up -d --build
+
+# Check status
+docker compose ps
+
+# Stop
+docker compose down
 ```
-
-**No Documents Indexed**
-- Upload documents first via UI
-- Check backend logs for errors
-
-**Frontend Connection Error**
-- Ensure backend is running on port 8000
-- Verify `NEXT_PUBLIC_API_URL` in `.env.local`
 
 ---
 
-## Roadmap
+## Supported File Formats
 
-**Phase 2:** Multimodal & Multilingual (Vision tracking, Voice input, TTS)
-**Phase 3:** Personalized Assessment (Hints, Rubrics, Role reversal)
-**Phase 4:** Mastery Tracking (Spaced repetition, Gamification)
+| Format | Extension |
+|--------|-----------|
+| PDF | `.pdf` |
+| Word | `.docx` |
+| PowerPoint | `.pptx` |
+| Plain Text | `.txt` |
+
+---
+
+## Privacy & Security
+
+- **100% offline** - No data leaves your machine
+- **No telemetry** - Zero tracking or analytics
+- **Local LLM** - Ollama runs entirely on your hardware
+- **Local embeddings** - sentence-transformers cached locally
+- **Sandboxed code** - Dangerous imports blocked
+- **No accounts** - No login required
 
 ---
 
 ## License
 
-Private project - AMD Slingshot Hackathon
+MIT
 
 ---
 
-**Built with ❤️ for privacy-conscious learners**
+Built with Ollama, FastAPI, Next.js, and ChromaDB.
