@@ -128,7 +128,7 @@ GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizz
 - **Python 3.10+**
 - **Node.js 18+**
 - **Ollama** - [Download](https://ollama.com/download)
-- **NVIDIA GPU** recommended (works on CPU too, slower)
+- **AMD GPU** recommended (works on CPU too, slower)
 
 ### Installation
 
