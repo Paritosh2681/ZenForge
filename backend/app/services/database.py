@@ -132,6 +132,45 @@ CREATE TABLE IF NOT EXISTS topic_mastery (
     FOREIGN KEY (topic_id) REFERENCES topics(id)
 );
 
+-- Phase 5: Badges & Achievements
+CREATE TABLE IF NOT EXISTS badges (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    icon TEXT,
+    category TEXT CHECK(category IN ('streak', 'mastery', 'quiz', 'upload', 'exploration')),
+    requirement_type TEXT,
+    requirement_value INTEGER,
+    earned_at TIMESTAMP
+);
+
+-- Phase 5: Study Plans
+CREATE TABLE IF NOT EXISTS study_plans (
+    id TEXT PRIMARY KEY,
+    topic_id TEXT,
+    title TEXT NOT NULL,
+    description TEXT,
+    scheduled_date TEXT,
+    duration_minutes INTEGER DEFAULT 30,
+    status TEXT CHECK(status IN ('pending', 'in_progress', 'completed', 'skipped')) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    FOREIGN KEY (topic_id) REFERENCES topics(id)
+);
+
+-- Phase 3: Code Executions
+CREATE TABLE IF NOT EXISTS code_executions (
+    id TEXT PRIMARY KEY,
+    conversation_id TEXT,
+    code TEXT NOT NULL,
+    language TEXT DEFAULT 'python',
+    output TEXT,
+    error TEXT,
+    execution_time REAL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES conversations(id)
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
@@ -141,6 +180,9 @@ CREATE INDEX IF NOT EXISTS idx_questions_quiz ON questions(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_sessions_quiz ON quiz_sessions(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_responses_session ON quiz_responses(session_id);
 CREATE INDEX IF NOT EXISTS idx_topic_mastery_topic ON topic_mastery(topic_id);
+CREATE INDEX IF NOT EXISTS idx_badges_category ON badges(category);
+CREATE INDEX IF NOT EXISTS idx_study_plans_date ON study_plans(scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_code_executions_conv ON code_executions(conversation_id);
 """
 
 
@@ -168,22 +210,13 @@ class Database:
             self._connection = None
 
     async def init_schema(self):
-        """Initialize database schema"""
+        """Initialize database schema - always runs to ensure new tables are created"""
         db = await self.connect()
 
-        # Check if conversations table exists
-        cursor = await db.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='conversations'"
-        )
-        exists = await cursor.fetchone()
-
-        if not exists:
-            logger.info("Creating conversation database schema...")
-            await db.executescript(SCHEMA_SQL)
-            await db.commit()
-            logger.info("✓ Conversation database schema created successfully")
-        else:
-            logger.info("✓ Conversation database schema already exists")
+        logger.info("Ensuring all database tables exist...")
+        await db.executescript(SCHEMA_SQL)
+        await db.commit()
+        logger.info("✓ Database schema initialized successfully")
 
 
 # Global database instance

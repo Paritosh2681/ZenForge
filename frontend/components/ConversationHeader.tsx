@@ -97,9 +97,10 @@ export default function ConversationHeader({
     return (
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+          <div style={{ background: 'rgba(80,120,255,0.12)', border: '1px solid rgba(80,120,255,0.25)' }} className="w-8 h-8 rounded-full flex items-center justify-center">
             <svg
-              className="w-5 h-5 text-white"
+              className="w-5 h-5 flex-shrink-0"
+              style={{ color: 'hsl(220 80% 75%)' }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -112,7 +113,7 @@ export default function ConversationHeader({
               />
             </svg>
           </div>
-          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <span style={{ color: 'hsl(220 15% 90%)' }} className="text-lg font-semibold">
             New Conversation
           </span>
         </div>
@@ -124,9 +125,10 @@ export default function ConversationHeader({
     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Icon */}
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+        <div style={{ background: 'rgba(80,120,255,0.12)', border: '1px solid rgba(80,120,255,0.25)' }} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
           <svg
-            className="w-5 h-5 text-white"
+            className="w-5 h-5 flex-shrink-0"
+            style={{ color: 'hsl(220 80% 75%)' }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"

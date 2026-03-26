@@ -88,39 +88,33 @@ class QuizManager:
             await conn.rollback()
             logger.error(f"Failed to create quiz: {e}")
             raise
-        finally:
-            await conn.close()
 
     async def get_quiz(self, quiz_id: str) -> Optional[Quiz]:
         """Get quiz metadata (without questions)"""
 
         conn = await self.db.connect()
 
-        try:
-            cursor = await conn.execute(
-                """SELECT id, title, description, document_ids, difficulty, question_count,
-                          created_at, metadata
-                   FROM quizzes WHERE id = ?""",
-                (quiz_id,)
-            )
-            row = await cursor.fetchone()
+        cursor = await conn.execute(
+            """SELECT id, title, description, document_ids, difficulty, question_count,
+                      created_at, metadata
+               FROM quizzes WHERE id = ?""",
+            (quiz_id,)
+        )
+        row = await cursor.fetchone()
 
-            if not row:
-                return None
+        if not row:
+            return None
 
-            return Quiz(
-                id=row[0],
-                title=row[1],
-                description=row[2],
-                document_ids=json.loads(row[3]) if row[3] else [],
-                difficulty=row[4],
-                question_count=row[5],
-                created_at=datetime.fromisoformat(row[6]),
-                metadata=json.loads(row[7]) if row[7] else {}
-            )
-
-        finally:
-            await conn.close()
+        return Quiz(
+            id=row[0],
+            title=row[1],
+            description=row[2],
+            document_ids=json.loads(row[3]) if row[3] else [],
+            difficulty=row[4],
+            question_count=row[5],
+            created_at=datetime.fromisoformat(row[6]),
+            metadata=json.loads(row[7]) if row[7] else {}
+        )
 
     async def get_quiz_with_questions(self, quiz_id: str) -> Optional[QuizDetail]:
         """Get quiz with all questions"""
@@ -141,35 +135,31 @@ class QuizManager:
 
         conn = await self.db.connect()
 
-        try:
-            cursor = await conn.execute(
-                """SELECT id, quiz_id, question_text, question_type, difficulty, topic,
-                          options, correct_answer, explanation, points
-                   FROM questions WHERE quiz_id = ?
-                   ORDER BY id""",
-                (quiz_id,)
-            )
-            rows = await cursor.fetchall()
+        cursor = await conn.execute(
+            """SELECT id, quiz_id, question_text, question_type, difficulty, topic,
+                      options, correct_answer, explanation, points
+               FROM questions WHERE quiz_id = ?
+               ORDER BY id""",
+            (quiz_id,)
+        )
+        rows = await cursor.fetchall()
 
-            questions = []
-            for row in rows:
-                questions.append(Question(
-                    id=row[0],
-                    quiz_id=row[1],
-                    question_text=row[2],
-                    question_type=row[3],
-                    difficulty=row[4],
-                    topic=row[5],
-                    options=json.loads(row[6]) if row[6] else None,
-                    correct_answer=row[7],
-                    explanation=row[8],
-                    points=row[9]
-                ))
+        questions = []
+        for row in rows:
+            questions.append(Question(
+                id=row[0],
+                quiz_id=row[1],
+                question_text=row[2],
+                question_type=row[3],
+                difficulty=row[4],
+                topic=row[5],
+                options=json.loads(row[6]) if row[6] else None,
+                correct_answer=row[7],
+                explanation=row[8],
+                points=row[9]
+            ))
 
-            return questions
-
-        finally:
-            await conn.close()
+        return questions
 
     async def list_quizzes(
         self,
@@ -180,39 +170,35 @@ class QuizManager:
 
         conn = await self.db.connect()
 
-        try:
-            # Get total count
-            cursor = await conn.execute("SELECT COUNT(*) FROM quizzes")
-            total = (await cursor.fetchone())[0]
+        # Get total count
+        cursor = await conn.execute("SELECT COUNT(*) FROM quizzes")
+        total = (await cursor.fetchone())[0]
 
-            # Get quizzes
-            cursor = await conn.execute(
-                """SELECT id, title, description, document_ids, difficulty, question_count,
-                          created_at, metadata
-                   FROM quizzes
-                   ORDER BY created_at DESC
-                   LIMIT ? OFFSET ?""",
-                (limit, offset)
-            )
-            rows = await cursor.fetchall()
+        # Get quizzes
+        cursor = await conn.execute(
+            """SELECT id, title, description, document_ids, difficulty, question_count,
+                      created_at, metadata
+               FROM quizzes
+               ORDER BY created_at DESC
+               LIMIT ? OFFSET ?""",
+            (limit, offset)
+        )
+        rows = await cursor.fetchall()
 
-            quizzes = []
-            for row in rows:
-                quizzes.append(Quiz(
-                    id=row[0],
-                    title=row[1],
-                    description=row[2],
-                    document_ids=json.loads(row[3]) if row[3] else [],
-                    difficulty=row[4],
-                    question_count=row[5],
-                    created_at=datetime.fromisoformat(row[6]),
-                    metadata=json.loads(row[7]) if row[7] else {}
-                ))
+        quizzes = []
+        for row in rows:
+            quizzes.append(Quiz(
+                id=row[0],
+                title=row[1],
+                description=row[2],
+                document_ids=json.loads(row[3]) if row[3] else [],
+                difficulty=row[4],
+                question_count=row[5],
+                created_at=datetime.fromisoformat(row[6]),
+                metadata=json.loads(row[7]) if row[7] else {}
+            ))
 
-            return quizzes, total
-
-        finally:
-            await conn.close()
+        return quizzes, total
 
     async def delete_quiz(self, quiz_id: str) -> bool:
         """Delete a quiz and all associated data"""
@@ -229,8 +215,6 @@ class QuizManager:
             await conn.rollback()
             logger.error(f"Failed to delete quiz: {e}")
             return False
-        finally:
-            await conn.close()
 
     # Quiz Session Management
 
@@ -261,39 +245,33 @@ class QuizManager:
             await conn.rollback()
             logger.error(f"Failed to start quiz session: {e}")
             raise
-        finally:
-            await conn.close()
 
     async def get_quiz_session(self, session_id: str) -> Optional[QuizSession]:
         """Get quiz session details"""
 
         conn = await self.db.connect()
 
-        try:
-            cursor = await conn.execute(
-                """SELECT id, quiz_id, conversation_id, started_at, completed_at,
-                          score, max_score, time_taken
-                   FROM quiz_sessions WHERE id = ?""",
-                (session_id,)
-            )
-            row = await cursor.fetchone()
+        cursor = await conn.execute(
+            """SELECT id, quiz_id, conversation_id, started_at, completed_at,
+                      score, max_score, time_taken
+               FROM quiz_sessions WHERE id = ?""",
+            (session_id,)
+        )
+        row = await cursor.fetchone()
 
-            if not row:
-                return None
+        if not row:
+            return None
 
-            return QuizSession(
-                id=row[0],
-                quiz_id=row[1],
-                conversation_id=row[2],
-                started_at=datetime.fromisoformat(row[3]),
-                completed_at=datetime.fromisoformat(row[4]) if row[4] else None,
-                score=row[5],
-                max_score=row[6],
-                time_taken=row[7]
-            )
-
-        finally:
-            await conn.close()
+        return QuizSession(
+            id=row[0],
+            quiz_id=row[1],
+            conversation_id=row[2],
+            started_at=datetime.fromisoformat(row[3]),
+            completed_at=datetime.fromisoformat(row[4]) if row[4] else None,
+            score=row[5],
+            max_score=row[6],
+            time_taken=row[7]
+        )
 
     async def submit_answer(
         self,
@@ -351,8 +329,9 @@ class QuizManager:
                 timestamp=datetime.fromisoformat(row[6])
             )
 
-        finally:
-            await conn.close()
+        except Exception as e:
+            logger.error(f"Failed to submit answer: {e}")
+            raise
 
     async def complete_quiz_session(
         self,
@@ -433,8 +412,6 @@ class QuizManager:
             await conn.rollback()
             logger.error(f"Failed to complete quiz session: {e}")
             raise
-        finally:
-            await conn.close()
 
     def _check_answer(self, user_answer: str, correct_answer: str) -> bool:
         """Check if user answer matches correct answer"""

@@ -7,8 +7,18 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional
 import base64
-import numpy as np
-import cv2
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Optional heavy imports
+try:
+    import numpy as np
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    logger.warning("OpenCV/numpy not available - attention tracking disabled")
 
 from app.services.attention_tracker import AttentionTracker
 from app.services.voice_input import VoiceInputService

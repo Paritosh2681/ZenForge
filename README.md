@@ -10,6 +10,8 @@ GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizz
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6?logo=typescript&logoColor=white)
 
+<a href="https://buymeacoffee.com/abhishekjhadbz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="40"></a>
+
 ---
 
 ## Features
@@ -128,7 +130,7 @@ GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizz
 - **Python 3.10+**
 - **Node.js 18+**
 - **Ollama** - [Download](https://ollama.com/download)
-- **AMD GPU** recommended (works on CPU too, slower)
+- **NVIDIA GPU** recommended (works on CPU too, slower)
 
 ### Installation
 
@@ -420,6 +422,18 @@ docker compose down
 ## License
 
 MIT
+## Support
+
+If you find GuruCortex useful, consider supporting the project:
+
+<a href="https://buymeacoffee.com/abhishekjhadbz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
+---
+
+## Support
+
+If you find GuruCortex useful, consider supporting the project:
+
+<a href="https://buymeacoffee.com/abhishekjhadbz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
 
 ---
 

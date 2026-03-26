@@ -151,7 +151,13 @@ class AnalyticsEngine:
 
         except Exception as e:
             logger.error(f"Failed to get overall stats: {e}")
-            return {}
+            return {
+                'quizzes': {'total': 0, 'completed': 0, 'avg_score': 0, 'recent': 0},
+                'questions': {'total': 0, 'correct': 0, 'accuracy': 0, 'avg_time': 0},
+                'topics': {'learning': 0, 'mastered': 0, 'struggling': 0, 'avg_mastery': 0},
+                'engagement': {'streak_days': 0, 'last_activity': None},
+                'period_days': days
+            }
 
     async def get_topic_performance(
         self,
@@ -351,7 +357,12 @@ class AnalyticsEngine:
 
         except Exception as e:
             logger.error(f"Failed to get recommendations: {e}")
-            return {}
+            return {
+                'topics_to_review': [],
+                'suggested_difficulty': 'easy',
+                'study_tips': [],
+                'should_practice': False
+            }
 
     async def _calculate_streak(self, conversation_id: Optional[str]) -> int:
         """Calculate current learning streak in days"""
