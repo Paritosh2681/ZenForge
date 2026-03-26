@@ -35,10 +35,27 @@ export default function LearningDashboard() {
         api.getRecommendations(),
       ]);
 
-      setStats(statsData);
-      setTopicPerformance(topicsData.topics);
-      setQuizHistory(quizzesData.quizzes);
-      setRecommendations(recommendationsData);
+      // Validate stats data has required structure before setting
+      if (statsData && statsData.quizzes && statsData.questions && statsData.topics && statsData.engagement) {
+        setStats(statsData);
+      } else {
+        // Backend returned empty/partial data - use defaults
+        setStats({
+          quizzes: { total: 0, completed: 0, avg_score: 0, recent: 0 },
+          questions: { total: 0, correct: 0, accuracy: 0, avg_time: 0 },
+          topics: { learning: 0, mastered: 0, struggling: 0, avg_mastery: 0 },
+          engagement: { streak_days: 0, last_activity: undefined },
+          period_days: selectedPeriod,
+        } as OverallStats);
+      }
+      setTopicPerformance(topicsData?.topics || []);
+      setQuizHistory(quizzesData?.quizzes || []);
+      // Validate recommendations structure
+      if (recommendationsData && recommendationsData.study_tips) {
+        setRecommendations(recommendationsData);
+      } else {
+        setRecommendations(null);
+      }
     } catch (err) {
       console.error('Failed to load dashboard:', err);
       setError('Failed to load analytics dashboard');

@@ -3,17 +3,35 @@ Affective Computing Service - Attention & Fatigue Detection
 Uses MediaPipe for real-time analysis of student engagement
 """
 
-import cv2
-import mediapipe as mp
-import numpy as np
+import logging
 from typing import Dict, Optional, List
 from datetime import datetime, timedelta
 import time
+
+logger = logging.getLogger(__name__)
+
+try:
+    import cv2
+    import mediapipe as mp
+    import numpy as np
+    ATTENTION_AVAILABLE = True
+except ImportError as e:
+    ATTENTION_AVAILABLE = False
+    logger.warning(f"Attention tracking dependencies not available: {e}")
 
 class AttentionTracker:
     """Track student attention and fatigue using webcam"""
 
     def __init__(self):
+        if not ATTENTION_AVAILABLE:
+            logger.warning("AttentionTracker initialized without mediapipe/cv2 - features disabled")
+            self.face_mesh = None
+            self.blink_count = 0
+            self.last_blink_time = None
+            self.blink_timestamps = []
+            self.gaze_away_count = 0
+            return
+
         # Initialize MediaPipe Face Mesh
         self.mp_face_mesh = mp.solutions.face_mesh
         self.face_mesh = self.mp_face_mesh.FaceMesh(

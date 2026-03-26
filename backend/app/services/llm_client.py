@@ -122,3 +122,6 @@ Provide a clear, educational explanation. If this involves a process, workflow, 
                 return any(self.model in name for name in model_names)
         except Exception:
             return False
+
+# Alias for backward compatibility with topic_extractor.py
+LLMClient = OllamaClient

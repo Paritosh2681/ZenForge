@@ -3,11 +3,24 @@ Text-to-Speech Service - Multilingual Audio Output
 Uses Coqui TTS for local multilingual synthesis
 """
 
-from TTS.api import TTS
-import pyttsx3
+import logging
 from typing import Optional, Dict
 from pathlib import Path
 import tempfile
+
+logger = logging.getLogger(__name__)
+
+try:
+    from TTS.api import TTS
+except ImportError:
+    TTS = None
+
+try:
+    import pyttsx3
+    PYTTSX3_AVAILABLE = True
+except ImportError:
+    pyttsx3 = None
+    PYTTSX3_AVAILABLE = False
 
 class TextToSpeechService:
     """Local text-to-speech with multilingual support"""
@@ -21,7 +34,7 @@ class TextToSpeechService:
         """
         self.use_advanced = use_advanced
 
-        if use_advanced:
+        if use_advanced and TTS is not None:
             try:
                 # Initialize Coqui TTS (supports multiple languages)
                 print("Loading Coqui TTS model...")
@@ -33,6 +46,9 @@ class TextToSpeechService:
                 self.use_advanced = False
                 self._init_fallback()
         else:
+            if use_advanced:
+                print("Coqui TTS not installed or disabled. Using pyttsx3 fallback.")
+            self.use_advanced = False
             self._init_fallback()
 
         # Supported languages for advanced TTS

@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     # RAG Configuration
     TOP_K_RETRIEVAL: int = 4
-    SIMILARITY_THRESHOLD: float = 0.7
+    SIMILARITY_THRESHOLD: float = 0.3
 
     # Phase 3: Conversation Storage
     CONVERSATION_DB_PATH: Path = BASE_DIR / "data" / "conversations.db"

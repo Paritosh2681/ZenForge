@@ -38,15 +38,11 @@ export default function SessionSidebar({
   };
 
   const handleDelete = async (conversationId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent conversation selection
-
+    e.stopPropagation();
     if (!confirm('Delete this conversation?')) return;
-
     try {
       await api.deleteConversation(conversationId);
       setConversations(conversations.filter((c) => c.id !== conversationId));
-
-      // If deleting current conversation, create a new one
       if (conversationId === currentConversationId) {
         onNewConversation();
       }
@@ -63,7 +59,6 @@ export default function SessionSidebar({
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
@@ -72,108 +67,170 @@ export default function SessionSidebar({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        background: 'transparent',
+        fontFamily: "var(--font-outfit), system-ui, sans-serif",
+      }}
+    >
+      {/* Header — New Chat */}
+      <div
+        style={{
+          padding: '0.85rem 1rem',
+          borderBottom: '1px solid rgba(255,255,255,0.055)',
+          flexShrink: 0,
+        }}
+      >
         <button
           onClick={onNewConversation}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="rounded-full"
+          style={{
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            padding: '0.5rem 1rem',
+            background: 'rgba(80,120,255,0.14)',
+            border: '1px solid rgba(80,120,255,0.28)',
+            color: 'hsl(220 80% 75%)',
+            fontSize: '0.82rem',
+            fontWeight: 600,
+            fontFamily: "var(--font-outfit), sans-serif",
+            cursor: 'pointer',
+            borderRadius: '9999px',
+            transition: 'all 0.15s ease',
+            letterSpacing: '0.01em',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(80,120,255,0.22)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(80,120,255,0.14)';
+          }}
         >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4v16m8-8H4"
-            />
-          </svg>
-          New Chat
+          <span>+</span>
+          <span>New Chat</span>
         </button>
       </div>
 
-      {/* Conversations List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Conversation list */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0.5rem 0' }}>
         {loading && (
-          <div className="p-4 text-center text-gray-500">
-            Loading conversations...
+          <div style={{ padding: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+            <div 
+              className="animate-spin rounded-full border-b-2" 
+              style={{ 
+                width: '1.25rem', 
+                height: '1.25rem', 
+                borderColor: 'hsl(220 80% 62%)',
+                borderTopColor: 'transparent',
+                borderRightColor: 'transparent',
+                borderLeftColor: 'transparent',
+              }}
+            />
           </div>
         )}
 
         {error && (
-          <div className="p-4 text-center text-red-500">
+          <div style={{ padding: '1rem', textAlign: 'center', fontSize: '0.78rem', color: 'hsl(0 60% 55%)' }}>
             {error}
           </div>
         )}
 
         {!loading && !error && conversations.length === 0 && (
-          <div className="p-4 text-center text-gray-500">
+          <div style={{ padding: '1.5rem 1rem', textAlign: 'center', fontSize: '0.78rem', color: 'hsl(220 10% 38%)', fontFamily: "var(--font-outfit), sans-serif" }}>
             No conversations yet
           </div>
         )}
 
-        {!loading && !error && conversations.length > 0 && (
-          <div className="py-2">
-            {conversations.map((conversation) => (
-              <div
-                key={conversation.id}
-                onClick={() => onConversationSelect(conversation.id)}
-                className={`
-                  group relative px-4 py-3 mx-2 mb-1 rounded-lg cursor-pointer transition-colors
-                  ${
-                    conversation.id === currentConversationId
-                      ? 'bg-blue-100 dark:bg-blue-900/30 border-l-4 border-blue-600'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                  }
-                `}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0 pr-2">
-                    <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                      {conversation.title}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                      <span>{conversation.message_count} messages</span>
-                      <span>•</span>
-                      <span>{formatDate(conversation.updated_at)}</span>
-                    </div>
-                  </div>
-
-                  {/* Delete Button */}
-                  <button
-                    onClick={(e) => handleDelete(conversation.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-opacity"
-                    title="Delete conversation"
+        {!loading && !error && conversations.map((conversation) => {
+          const isActive = conversation.id === currentConversationId;
+          return (
+            <div
+              key={conversation.id}
+              onClick={() => onConversationSelect(conversation.id)}
+              style={{
+                position: 'relative',
+                padding: '0.6rem 1rem',
+                margin: '0 0.4rem 2px',
+                cursor: 'pointer',
+                background: isActive ? 'rgba(80,120,255,0.12)' : 'transparent',
+                borderLeft: isActive ? '2px solid hsl(220 80% 62%)' : '2px solid transparent',
+                transition: 'all 0.12s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div
+                    style={{
+                      fontSize: '0.8rem',
+                      fontWeight: isActive ? 600 : 400,
+                      color: isActive ? 'hsl(220 15% 85%)' : 'hsl(220 12% 68%)',
+                      fontFamily: "var(--font-outfit), sans-serif",
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
                   >
-                    <svg
-                      className="w-4 h-4 text-red-600 dark:text-red-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
+                    {conversation.title}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: 'hsl(220 10% 38%)', marginTop: '0.2rem', fontFamily: "'JetBrains Mono', monospace" }}>
+                    {conversation.message_count} msg · {formatDate(conversation.updated_at)}
+                  </div>
                 </div>
+
+                <button
+                  onClick={(e) => handleDelete(conversation.id, e)}
+                  title="Delete"
+                  style={{
+                    opacity: 0,
+                    padding: '0.2rem',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'hsl(0 50% 55%)',
+                    fontSize: '0.7rem',
+                    transition: 'opacity 0.15s ease',
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0'; }}
+                >
+                  ✕
+                </button>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 text-center">
-        Phase 3: Context Management
+      <div
+        style={{
+          padding: '0.6rem 1rem',
+          borderTop: '1px solid rgba(255,255,255,0.045)',
+          fontSize: '0.65rem',
+          color: 'hsl(220 10% 30%)',
+          textAlign: 'center',
+          fontFamily: "'JetBrains Mono', monospace",
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          flexShrink: 0,
+        }}
+      >
+        Context Management
       </div>
     </div>
   );
 }
+

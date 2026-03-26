@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 
 interface VoiceInputProps {
-  on Transcription: (text: string, language: string) => void;
+  onTranscription: (text: string, language: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -86,7 +86,7 @@ export default function VoiceInput({ onTranscription, onError }: VoiceInputProps
         className={`p-3 rounded-full transition-all ${
           isRecording
             ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-primary-500 hover:bg-primary-600'
+            : 'bg-primary hover:opacity-90'
         } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''} text-white`}
         title={isRecording ? 'Stop recording' : 'Start voice input'}
       >

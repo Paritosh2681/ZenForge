@@ -331,6 +331,119 @@ export const api = {
     );
     return response.data;
   },
+
+  // Phase 3: Code Execution
+  async executeCode(code: string, language: string = 'python', conversationId?: string): Promise<{
+    execution_id: string; output: string; error: string | null; execution_time: number; language: string;
+  }> {
+    const response = await apiClient.post('/code/execute', { code, language, conversation_id: conversationId });
+    return response.data;
+  },
+
+  async getCodeHistory(conversationId?: string, limit: number = 20): Promise<{
+    executions: any[]; count: number;
+  }> {
+    const params = new URLSearchParams();
+    if (conversationId) params.append('conversation_id', conversationId);
+    params.append('limit', limit.toString());
+    const response = await apiClient.get(`/code/history?${params.toString()}`);
+    return response.data;
+  },
+
+  // Phase 5: Study Planner
+  async getStudyPlans(status?: string, daysAhead: number = 7): Promise<{
+    plans: any[]; count: number;
+  }> {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    params.append('days_ahead', daysAhead.toString());
+    const response = await apiClient.get(`/planner/plans?${params.toString()}`);
+    return response.data;
+  },
+
+  async createStudyPlan(plan: { topic_id?: string; title: string; description?: string; scheduled_date: string; duration_minutes?: number }): Promise<any> {
+    const response = await apiClient.post('/planner/plans', plan);
+    return response.data;
+  },
+
+  async updateStudyPlan(planId: string, update: { status?: string; scheduled_date?: string; duration_minutes?: number }): Promise<any> {
+    const response = await apiClient.patch(`/planner/plans/${planId}`, update);
+    return response.data;
+  },
+
+  async deleteStudyPlan(planId: string): Promise<{ success: boolean }> {
+    const response = await apiClient.delete(`/planner/plans/${planId}`);
+    return response.data;
+  },
+
+  async generateStudyPlan(days: number = 7): Promise<{ plans_created: number; plans: any[] }> {
+    const response = await apiClient.post(`/planner/generate?days=${days}`);
+    return response.data;
+  },
+
+  // Phase 5: Gamification
+  async getBadges(): Promise<{ badges: any[]; earned: number; total: number }> {
+    const response = await apiClient.get('/gamification/badges');
+    return response.data;
+  },
+
+  async checkBadges(): Promise<{ newly_earned: string[]; stats: any; count: number }> {
+    const response = await apiClient.post('/gamification/check-badges');
+    return response.data;
+  },
+
+  async getGamificationStats(): Promise<{
+    badges_earned: number; total_badges: number; quizzes_completed: number;
+    streak_days: number; total_study_minutes: number; topics_mastered: number; level: number;
+  }> {
+    const response = await apiClient.get('/gamification/stats');
+    return response.data;
+  },
+
+  // Phase 4: Podcast Generation
+  async generatePodcastScript(topic?: string, duration?: string, style?: string): Promise<{
+    title: string; speakers: string[]; segments: { speaker: string; text: string }[];
+    duration_estimate: string; style: string; segment_count: number;
+  }> {
+    const response = await apiClient.post('/podcast/generate-script', { topic, duration, style });
+    return response.data;
+  },
+
+  // Phase 4: Protege Effect (Teach-Back Mode)
+  async startProtegeSession(topic?: string, difficulty?: string): Promise<{
+    topic: string; difficulty: string; ai_message: string; instructions: string;
+  }> {
+    const response = await apiClient.post('/protege/start', { topic, difficulty });
+    return response.data;
+  },
+
+  async protegeRespond(sessionTopic: string, userExplanation: string, history: { role: string; content: string }[]): Promise<{
+    ai_message: string; topic: string;
+  }> {
+    const response = await apiClient.post('/protege/respond', {
+      session_topic: sessionTopic, user_explanation: userExplanation, conversation_history: history
+    });
+    return response.data;
+  },
+
+  async evaluateTeaching(sessionTopic: string, history: { role: string; content: string }[]): Promise<{
+    scores: Record<string, number>; overall_score: number; max_score: number;
+    percentage: number; feedback: string; strengths: string; improvements: string; grade: string;
+  }> {
+    const response = await apiClient.post('/protege/evaluate', {
+      session_topic: sessionTopic, conversation_history: history
+    });
+    return response.data;
+  },
+
+  // Multimodal: TTS
+  async synthesizeSpeech(text: string, language?: string): Promise<Blob> {
+    const response = await apiClient.post('/multimodal/synthesize-speech',
+      { text, language: language || 'en' },
+      { responseType: 'blob' }
+    );
+    return response.data;
+  },
 };
 
 export default api;

@@ -3,10 +3,133 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api-client';
 import type { Quiz, QuizCreateRequest } from '@/types/quiz';
+import { ClipboardList } from 'lucide-react';
 
 interface QuizListProps {
   onSelectQuiz: (quizId: string) => void;
 }
+
+const D = {
+  wrap: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    height: '100%',
+    background: 'rgba(8,9,18,0.65)',
+    backdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.06)',
+    fontFamily: "var(--font-outfit), system-ui, sans-serif",
+  },
+  header: {
+    padding: '1.25rem 1.5rem',
+    borderBottom: '1px solid rgba(255,255,255,0.06)',
+    flexShrink: 0,
+  },
+  headerRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '0.5rem',
+  },
+  title: {
+    fontSize: '1.3rem',
+    fontWeight: 700,
+    letterSpacing: '-0.02em',
+    color: 'hsl(220 15% 90%)',
+    fontFamily: "var(--font-outfit), sans-serif",
+  },
+  generateBtn: (alt: boolean): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+    padding: '0.4rem 1rem',
+    background: alt ? 'rgba(255,255,255,0.05)' : 'rgba(80,120,255,0.18)',
+    border: `1px solid ${alt ? 'rgba(255,255,255,0.1)' : 'rgba(80,120,255,0.3)'}`,
+    color: alt ? 'hsl(220 10% 55%)' : 'hsl(220 80% 75%)',
+    fontSize: '0.82rem',
+    fontWeight: 600,
+    fontFamily: "var(--font-outfit), sans-serif",
+    cursor: 'pointer',
+    borderRadius: '9999px',
+    transition: 'all 0.15s ease',
+  }),
+  form: {
+    marginTop: '1rem',
+    padding: '1rem',
+    background: 'rgba(255,255,255,0.03)',
+    border: '1px solid rgba(255,255,255,0.06)',
+  },
+  label: {
+    display: 'block',
+    fontSize: '0.72rem',
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase' as const,
+    color: 'hsl(220 10% 42%)',
+    fontFamily: "'JetBrains Mono', monospace",
+    marginBottom: '0.4rem',
+  },
+  select: {
+    width: '100%',
+    padding: '0.45rem 0.75rem',
+    background: 'rgba(255,255,255,0.04)',
+    border: '1px solid rgba(255,255,255,0.09)',
+    color: 'hsl(220 12% 75%)',
+    fontSize: '0.85rem',
+    fontFamily: "var(--font-outfit), sans-serif",
+    outline: 'none',
+    borderRadius: 0,
+  },
+  actionBtn: (green?: boolean): React.CSSProperties => ({
+    flex: 1,
+    padding: '0.5rem 1rem',
+    background: green ? 'rgba(80,200,140,0.15)' : 'rgba(255,255,255,0.05)',
+    border: `1px solid ${green ? 'rgba(80,200,140,0.25)' : 'rgba(255,255,255,0.08)'}`,
+    color: green ? '#4ade80' : 'hsl(220 10% 55%)',
+    fontSize: '0.82rem',
+    fontWeight: 600,
+    fontFamily: "var(--font-outfit), sans-serif",
+    cursor: 'pointer',
+    borderRadius: '9999px',
+    transition: 'all 0.15s ease',
+  }),
+  list: {
+    flex: 1,
+    overflowY: 'auto' as const,
+    padding: '1rem 1.5rem',
+  },
+  quizCard: (hover: boolean): React.CSSProperties => ({
+    padding: '1rem',
+    background: hover ? 'rgba(80,120,255,0.08)' : 'rgba(255,255,255,0.02)',
+    border: `1px solid ${hover ? 'rgba(80,120,255,0.2)' : 'rgba(255,255,255,0.06)'}`,
+    cursor: 'pointer',
+    marginBottom: '0.5rem',
+    transition: 'all 0.15s ease',
+  }),
+  quizTitle: {
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    color: 'hsl(220 15% 85%)',
+    fontFamily: "var(--font-outfit), sans-serif",
+  },
+  quizMeta: {
+    fontSize: '0.72rem',
+    color: 'hsl(220 10% 42%)',
+    fontFamily: "'JetBrains Mono', monospace",
+    marginTop: '0.35rem',
+    display: 'flex',
+    gap: '0.75rem',
+    alignItems: 'center',
+  },
+  badge: {
+    padding: '0.1rem 0.5rem',
+    background: 'rgba(80,120,255,0.12)',
+    border: '1px solid rgba(80,120,255,0.2)',
+    color: 'hsl(220 80% 72%)',
+    fontSize: '0.65rem',
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase' as const,
+    fontFamily: "'JetBrains Mono', monospace",
+  },
+};
 
 export default function QuizList({ onSelectQuiz }: QuizListProps) {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -14,14 +137,11 @@ export default function QuizList({ onSelectQuiz }: QuizListProps) {
   const [generating, setGenerating] = useState(false);
   const [showGenerateForm, setShowGenerateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Quiz generation form state
   const [numQuestions, setNumQuestions] = useState(10);
   const [difficulty, setDifficulty] = useState('mixed');
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadQuizzes();
-  }, []);
+  useEffect(() => { loadQuizzes(); }, []);
 
   const loadQuizzes = async () => {
     try {
@@ -30,7 +150,6 @@ export default function QuizList({ onSelectQuiz }: QuizListProps) {
       const data = await api.listQuizzes(50, 0);
       setQuizzes(data.quizzes);
     } catch (err) {
-      console.error('Failed to load quizzes:', err);
       setError('Failed to load quizzes');
     } finally {
       setLoading(false);
@@ -39,26 +158,15 @@ export default function QuizList({ onSelectQuiz }: QuizListProps) {
 
   const handleGenerateQuiz = async () => {
     if (generating) return;
-
     try {
       setGenerating(true);
       setError(null);
-
-      const request: QuizCreateRequest = {
-        num_questions: numQuestions,
-        difficulty: difficulty,
-      };
-
+      const request: QuizCreateRequest = { num_questions: numQuestions, difficulty };
       const newQuiz = await api.generateQuiz(request);
-
-      // Add to list
       setQuizzes([newQuiz, ...quizzes]);
       setShowGenerateForm(false);
-
-      // Auto-select new quiz
       onSelectQuiz(newQuiz.id);
     } catch (err: any) {
-      console.error('Failed to generate quiz:', err);
       setError(err.response?.data?.detail || 'Failed to generate quiz. Make sure documents are uploaded.');
     } finally {
       setGenerating(false);
@@ -67,173 +175,115 @@ export default function QuizList({ onSelectQuiz }: QuizListProps) {
 
   const handleDeleteQuiz = async (quizId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-
     if (!confirm('Delete this quiz?')) return;
-
     try {
       await api.deleteQuiz(quizId);
       setQuizzes(quizzes.filter((q) => q.id !== quizId));
-    } catch (err) {
-      console.error('Failed to delete quiz:', err);
+    } catch {
       alert('Failed to delete quiz');
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
-  };
+  const formatDate = (d: string) => new Date(d).toLocaleDateString();
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Quizzes
-          </h2>
+    <div style={D.wrap}>
+      <div style={D.header}>
+        <div style={D.headerRow}>
+          <span style={D.title}>Quizzes</span>
           <button
             onClick={() => setShowGenerateForm(!showGenerateForm)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+            style={D.generateBtn(showGenerateForm)}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Generate Quiz
+            <span>+</span> Generate Quiz
           </button>
         </div>
 
-        {/* Generate Quiz Form */}
         {showGenerateForm && (
-          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
-              Generate New Quiz
-            </h3>
-
-            <div className="space-y-4">
-              {/* Number of Questions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Number of Questions: {numQuestions}
-                </label>
-                <input
-                  type="range"
-                  min="5"
-                  max="20"
-                  value={numQuestions}
-                  onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-600"
-                />
-              </div>
-
-              {/* Difficulty */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Difficulty
-                </label>
-                <select
-                  value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                >
-                  <option value="easy">Easy</option>
-                  <option value="medium">Medium</option>
-                  <option value="hard">Hard</option>
-                  <option value="mixed">Mixed</option>
-                </select>
-              </div>
-
-              {/* Generate Button */}
-              <div className="flex gap-2">
-                <button
-                  onClick={handleGenerateQuiz}
-                  disabled={generating}
-                  className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
-                >
-                  {generating ? 'Generating...' : 'Generate'}
-                </button>
-                <button
-                  onClick={() => setShowGenerateForm(false)}
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-
-              {error && (
-                <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded text-sm text-red-700 dark:text-red-300">
-                  {error}
-                </div>
-              )}
+          <div style={D.form}>
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={D.label}>Questions: {numQuestions}</label>
+              <input
+                type="range" min="5" max="20" value={numQuestions}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                style={{ width: '100%', accentColor: 'hsl(220 80% 62%)' }}
+              />
             </div>
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={D.label}>Difficulty</label>
+              <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} style={D.select}>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+                <option value="mixed">Mixed</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={handleGenerateQuiz} disabled={generating} style={D.actionBtn(true)}>
+                {generating ? 'Generating...' : 'Generate'}
+              </button>
+              <button onClick={() => setShowGenerateForm(false)} style={D.actionBtn()}>Cancel</button>
+            </div>
+            {error && (
+              <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.15)', color: 'hsl(0 60% 65%)', fontSize: '0.78rem' }}>
+                {error}
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* Quiz List */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div style={D.list}>
         {loading && (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
+          <div style={{ textAlign: 'center', padding: '2rem', fontSize: '0.78rem', color: 'hsl(220 10% 38%)', fontFamily: "'JetBrains Mono', monospace" }}>
             Loading quizzes...
           </div>
         )}
 
         {!loading && quizzes.length === 0 && (
-          <div className="text-center text-gray-500 dark:text-gray-400 py-8">
-            <div className="text-6xl mb-4">📝</div>
-            <p className="mb-4">No quizzes yet</p>
-            <p className="text-sm">Upload documents and generate your first quiz!</p>
+          <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.25rem' }}>
+              <ClipboardList size={48} strokeWidth={1.5} style={{ color: 'hsl(220 80% 62%)', opacity: 0.8 }} />
+            </div>
+            <div style={{ color: 'hsl(220 15% 75%)', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.3rem' }}>No quizzes yet</div>
+            <div style={{ color: 'hsl(220 10% 42%)', fontSize: '0.8rem' }}>Upload documents and generate your first quiz.</div>
           </div>
         )}
 
-        {!loading && quizzes.length > 0 && (
-          <div className="grid gap-4">
-            {quizzes.map((quiz) => (
-              <div
-                key={quiz.id}
-                onClick={() => onSelectQuiz(quiz.id)}
-                className="group p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer transition-colors bg-white dark:bg-gray-800"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                      {quiz.title}
-                    </h3>
-                    {quiz.description && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                        {quiz.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        {quiz.question_count} questions
-                      </span>
-                      <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
-                        {quiz.difficulty}
-                      </span>
-                      <span>{formatDate(quiz.created_at)}</span>
-                    </div>
-                  </div>
-
-                  {/* Delete Button */}
-                  <button
-                    onClick={(e) => handleDeleteQuiz(quiz.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-opacity"
-                    title="Delete quiz"
-                  >
-                    <svg className="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
+        {!loading && quizzes.map((quiz) => (
+          <div
+            key={quiz.id}
+            onClick={() => onSelectQuiz(quiz.id)}
+            style={D.quizCard(hoveredId === quiz.id)}
+            onMouseEnter={() => setHoveredId(quiz.id)}
+            onMouseLeave={() => setHoveredId(null)}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={D.quizTitle}>{quiz.title}</div>
+                {quiz.description && (
+                  <div style={{ fontSize: '0.78rem', color: 'hsl(220 10% 48%)', marginTop: '0.2rem' }}>{quiz.description}</div>
+                )}
+                <div style={D.quizMeta}>
+                  <span>{quiz.question_count} questions</span>
+                  <span style={D.badge}>{quiz.difficulty}</span>
+                  <span>{formatDate(quiz.created_at)}</span>
                 </div>
               </div>
-            ))}
+              <button
+                onClick={(e) => handleDeleteQuiz(quiz.id, e)}
+                title="Delete"
+                style={{ padding: '0.2rem 0.4rem', background: 'transparent', border: 'none', color: 'hsl(0 50% 55%)', cursor: 'pointer', fontSize: '0.75rem', opacity: 0.6 }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.opacity = '1'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.opacity = '0.6'; }}
+              >
+                ✕
+              </button>
+            </div>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
 }
+

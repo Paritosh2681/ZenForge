@@ -7,7 +7,8 @@ import logging
 from typing import List, Dict, Any, Optional
 import random
 
-from app.services.ollama_client import OllamaClient
+from app.services.llm_client import OllamaClient
+
 from app.services.vector_store import VectorStore
 from app.models.quiz_schemas import QuestionCreate
 from app.config import settings
@@ -86,9 +87,9 @@ class AssessmentGenerator:
             # Get all chunks from vector store
             # In a full implementation, you'd filter by document_ids
             # For now, we'll use a search query to get diverse content
-            results = self.vector_store.search(
+            results = self.vector_store.query(
                 query_text="educational content summary concepts",
-                k=20  # Get more chunks for variety
+                top_k=20  # Get more chunks for variety
             )
 
             chunks = []

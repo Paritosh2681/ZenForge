@@ -44,22 +44,33 @@ class TopicExtractor:
             List of topic dictionaries with name, category, and confidence
         """
         try:
-            # Get document content
-            async with aiosqlite.connect(self.db_path) as conn:
-                conn.row_factory = aiosqlite.Row
-
+            # Try to get document content from vector store
+            docs = []
+            try:
+                from app.services.vector_store import VectorStore
+                vs = VectorStore()
                 if document_ids:
-                    placeholders = ','.join('?' * len(document_ids))
-                    cursor = await conn.execute(
-                        f"SELECT content, metadata FROM documents WHERE id IN ({placeholders})",
-                        document_ids
-                    )
+                    for doc_id in document_ids:
+                        results = vs.collection.get(
+                            where={"document_id": doc_id},
+                            limit=10,
+                            include=["documents", "metadatas"]
+                        )
+                        if results and results.get("documents"):
+                            for doc_text in results["documents"]:
+                                docs.append({"content": doc_text})
                 else:
-                    cursor = await conn.execute(
-                        "SELECT content, metadata FROM documents LIMIT 20"
+                    # Get a sample of all documents
+                    results = vs.collection.get(
+                        limit=20,
+                        include=["documents", "metadatas"]
                     )
-
-                docs = await cursor.fetchall()
+                    if results and results.get("documents"):
+                        for doc_text in results["documents"]:
+                            docs.append({"content": doc_text})
+            except Exception as vs_err:
+                logger.warning(f"Vector store unavailable for topic extraction: {vs_err}")
+                return []
 
             if not docs:
                 logger.warning("No documents found for topic extraction")

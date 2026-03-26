@@ -3,12 +3,21 @@ Voice Input Service - Multilingual Speech Recognition
 Uses OpenAI Whisper for local speech-to-text
 """
 
-import whisper
-import numpy as np
-import soundfile as sf
+import logging
 from typing import Dict, Optional
 from pathlib import Path
 import tempfile
+
+logger = logging.getLogger(__name__)
+
+try:
+    import whisper
+    import numpy as np
+    import soundfile as sf
+    WHISPER_AVAILABLE = True
+except ImportError as e:
+    WHISPER_AVAILABLE = False
+    logger.warning(f"Voice input dependencies not available: {e}")
 
 class VoiceInputService:
     """Local speech-to-text using Whisper"""
@@ -24,6 +33,12 @@ class VoiceInputService:
                        - small: better accuracy (~500MB)
                        - medium/large: best quality (1-3GB)
         """
+        if not WHISPER_AVAILABLE:
+            logger.warning("VoiceInputService initialized without whisper - features disabled")
+            self.model = None
+            self.supported_languages = ["en"]
+            return
+
         print(f"Loading Whisper model: {model_size}...")
         self.model = whisper.load_model(model_size)
         self.supported_languages = [

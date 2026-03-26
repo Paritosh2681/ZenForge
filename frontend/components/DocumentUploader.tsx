@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { api } from '@/lib/api-client';
+import { UploadCloud } from 'lucide-react';
 
 interface DocumentUploaderProps {
   onUploadSuccess?: (message: string) => void;
@@ -60,7 +61,21 @@ export default function DocumentUploader({ onUploadSuccess }: DocumentUploaderPr
 
   return (
     <div className="space-y-4">
-      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary-500 transition-colors">
+      <div 
+        className="border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300"
+        style={{
+          borderColor: 'rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.02)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'rgba(80,120,255,0.4)';
+          e.currentTarget.style.background = 'rgba(80,120,255,0.05)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+          e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+        }}
+      >
         <input
           type="file"
           ref={fileInputRef}
@@ -73,14 +88,14 @@ export default function DocumentUploader({ onUploadSuccess }: DocumentUploaderPr
 
         <label
           htmlFor="file-upload"
-          className={`cursor-pointer ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`cursor-pointer block w-full h-full ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <div className="space-y-2">
-            <div className="text-4xl">📚</div>
-            <div className="text-lg font-medium text-gray-700">
+          <div className="space-y-3 flex flex-col items-center">
+            <UploadCloud size={48} strokeWidth={1.5} style={{ color: 'hsl(220 80% 62%)', opacity: 0.85, marginBottom: '0.25rem' }} />
+            <div className="text-lg font-semibold" style={{ color: 'hsl(220 15% 90%)' }}>
               {uploading ? 'Processing...' : 'Upload Study Materials'}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm font-medium" style={{ color: 'hsl(220 10% 55%)' }}>
               PDF, PowerPoint, or Word documents
             </div>
           </div>
@@ -89,11 +104,13 @@ export default function DocumentUploader({ onUploadSuccess }: DocumentUploaderPr
 
       {message && (
         <div
-          className={`p-4 rounded-lg animate-fade-in ${
-            message.type === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
-          }`}
+          className={`p-4 rounded-lg animate-fade-in`}
+          style={{
+            background: message.type === 'success' ? 'rgba(80,200,140,0.1)' : 'rgba(255,80,80,0.1)',
+            border: `1px solid ${message.type === 'success' ? 'rgba(80,200,140,0.2)' : 'rgba(255,80,80,0.2)'}`,
+            color: message.type === 'success' ? '#4ade80' : 'hsl(0 60% 65%)',
+            fontSize: '0.88rem'
+          }}
         >
           {message.text}
         </div>

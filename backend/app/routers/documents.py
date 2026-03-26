@@ -18,7 +18,7 @@ async def upload_document(file: UploadFile = File(...)):
     """Upload and process a document (PDF, PPTX, DOCX)"""
 
     # Validate file type
-    allowed_extensions = {".pdf", ".pptx", ".ppt", ".docx", ".doc"}
+    allowed_extensions = {".pdf", ".pptx", ".ppt", ".docx", ".doc", ".txt"}
     file_extension = Path(file.filename).suffix.lower()
 
     if file_extension not in allowed_extensions:

@@ -95,7 +95,6 @@ class RAGEngine:
         generation_result = await self.llm_client.generate_with_context(
             query=user_query,
             context_chunks=context_texts,
-            conversation_history=context_window.get('conversation_history', ''),
             generate_diagram=generate_diagram
         )
 
