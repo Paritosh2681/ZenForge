@@ -42,6 +42,7 @@
     font-family: var(--font-outfit), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: dark;
   }
 
   /* Global background image */

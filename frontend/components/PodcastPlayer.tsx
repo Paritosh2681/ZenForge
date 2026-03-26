@@ -128,26 +128,26 @@ export default function PodcastPlayer() {
             placeholder="Topic (leave empty for auto-detect from documents)"
             value={topic}
             onChange={e => setTopic(e.target.value)}
-            className="w-full px-4 py-2 bg-background border border-border rounded-lg text-sm"
+            className="w-full px-4 py-2 bg-background border border-border rounded-full text-sm"
           />
 
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="text-xs text-muted-foreground block mb-1">Duration</label>
               <select value={duration} onChange={e => setDuration(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm">
-                <option value="short">Short (2-3 min)</option>
-                <option value="medium">Medium (5 min)</option>
-                <option value="long">Long (10 min)</option>
+                className="w-full px-3 py-2 bg-background border border-border rounded-full text-sm">
+                <option value="short" className="bg-background text-foreground">Short (2-3 min)</option>
+                <option value="medium" className="bg-background text-foreground">Medium (5 min)</option>
+                <option value="long" className="bg-background text-foreground">Long (10 min)</option>
               </select>
             </div>
             <div className="flex-1">
               <label className="text-xs text-muted-foreground block mb-1">Style</label>
               <select value={style} onChange={e => setStyle(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm">
-                <option value="educational">Educational</option>
-                <option value="debate">Debate</option>
-                <option value="interview">Interview</option>
+                className="w-full px-3 py-2 bg-background border border-border rounded-full text-sm">
+                <option value="educational" className="bg-background text-foreground">Educational</option>
+                <option value="debate" className="bg-background text-foreground">Debate</option>
+                <option value="interview" className="bg-background text-foreground">Interview</option>
               </select>
             </div>
           </div>
@@ -155,13 +155,13 @@ export default function PodcastPlayer() {
           <button
             onClick={generateScript}
             disabled={generating}
-            className="w-full py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 font-medium transition-colors"
+            className="w-full py-3 btn-pill-primary flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 transition-colors"
           >
             {generating ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span>
+              <>
+                <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span>
                 Generating Podcast Script...
-              </span>
+              </>
             ) : (
               'Generate Podcast'
             )}

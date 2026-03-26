@@ -106,10 +106,10 @@ export default function StudyPlanner() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Study Planner</h2>
         <div className="flex gap-2">
-          <button onClick={() => setShowAdd(!showAdd)} className="px-3 py-1.5 text-sm bg-secondary hover:bg-secondary/80 rounded-lg transition-colors">
-            + Add Plan
+          <button onClick={() => setShowAdd(!showAdd)} className="px-4 py-2 text-sm btn-pill-ghost flex items-center gap-2 transition-all">
+            <span>+</span> Add Plan
           </button>
-          <button onClick={generatePlan} disabled={generating} className="px-3 py-1.5 text-sm bg-primary text-primary-foreground hover:opacity-90 rounded-lg transition-colors disabled:opacity-50">
+          <button onClick={generatePlan} disabled={generating} className="px-4 py-2 text-sm btn-pill-primary flex items-center gap-2 disabled:opacity-50 transition-all">
             {generating ? 'Generating...' : 'Auto-Generate'}
           </button>
         </div>

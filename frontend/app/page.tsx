@@ -310,44 +310,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Floating badge */}
-            <motion.div
-              animate={{ y: [0, -8, 0] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-              className="glass-card"
-              style={{
-                position: "absolute",
-                right: "-1.5rem",
-                bottom: "-1.5rem",
-                padding: "0.75rem 1rem",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.65rem",
-              }}
-            >
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "rgba(80,210,140,0.12)",
-                  border: "1px solid rgba(80,210,140,0.2)",
-                  borderRadius: "0",
-                }}
-              >
-                <Brain size={16} style={{ color: "#4ade80" }} />
-              </div>
-              <div>
-                <div style={{ fontSize: "0.68rem", color: "hsl(220 10% 45%)", fontFamily: "'JetBrains Mono', monospace" }}>
-                  Memory
-                </div>
-                <div style={{ fontSize: "0.82rem", fontWeight: 600, color: "hsl(220 15% 88%)", fontFamily: "var(--font-outfit), sans-serif" }}>
-                  Optimized
-                </div>
-              </div>
-            </motion.div>
+
           </motion.div>
         </div>
       </main>

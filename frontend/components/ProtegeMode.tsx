@@ -123,7 +123,7 @@ export default function ProtegeMode() {
             placeholder="Topic to teach (leave empty for auto-select)"
             value={topic}
             onChange={e => setTopic(e.target.value)}
-            className="w-full px-4 py-2 bg-background border border-border rounded-lg text-sm"
+            className="w-full px-4 py-2 bg-background border border-border rounded-full text-sm"
           />
 
           <div>
@@ -131,7 +131,7 @@ export default function ProtegeMode() {
             <div className="flex gap-2">
               {['easy', 'medium', 'hard'].map(d => (
                 <button key={d} onClick={() => setDifficulty(d)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
+                  className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors capitalize ${
                     difficulty === d ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
                   }`}>
                   {d}
@@ -146,23 +146,7 @@ export default function ProtegeMode() {
           <button 
             onClick={startSession} 
             disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.8rem',
-              background: 'rgba(80,120,255,0.18)',
-              border: '1px solid rgba(80,120,255,0.3)',
-              color: 'hsl(220 80% 75%)',
-              fontSize: '0.9rem',
-              fontWeight: 600,
-              fontFamily: "var(--font-outfit), sans-serif",
-              borderRadius: '9999px',
-              transition: 'all 0.15s ease',
-              opacity: loading ? 0.6 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
+            className="w-full py-3 btn-pill-primary flex items-center justify-center transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Starting Session...' : 'Start Teaching Session'}
           </button>

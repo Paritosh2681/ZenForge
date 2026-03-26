@@ -96,18 +96,10 @@ export default function AttentionMonitor() {
         </div>
         <button
           onClick={() => setIsActive(!isActive)}
-          style={{
-            padding: '0.4rem 1.1rem',
-            background: isActive ? 'rgba(255,80,80,0.15)' : 'rgba(80,120,255,0.15)',
-            border: `1px solid ${isActive ? 'rgba(255,80,80,0.3)' : 'rgba(80,120,255,0.3)'}`,
-            color: isActive ? '#f87171' : 'hsl(220 80% 72%)',
-            fontSize: '0.82rem',
-            fontWeight: 600,
-            fontFamily: "var(--font-outfit), sans-serif",
-            cursor: 'pointer',
-            borderRadius: '9999px',
-            transition: 'all 0.15s ease',
-          }}
+          className={isActive 
+            ? "px-4 py-2 text-sm rounded-full transition-all bg-red-500/15 border border-red-500/30 text-red-400 font-semibold"
+            : "px-4 py-2 text-sm transition-all btn-pill-primary"
+          }
         >
           {isActive ? 'Stop' : 'Start'} Monitoring
         </button>
