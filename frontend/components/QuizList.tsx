@@ -14,7 +14,7 @@ const D = {
     display: 'flex',
     flexDirection: 'column' as const,
     height: '100%',
-    background: 'rgba(8,9,18,0.65)',
+    background: 'rgba(8,9,18,1)',
     backdropFilter: 'blur(20px)',
     border: '1px solid rgba(255,255,255,0.06)',
     fontFamily: "var(--font-outfit), system-ui, sans-serif",
@@ -193,6 +193,7 @@ export default function QuizList({ onSelectQuiz }: QuizListProps) {
           <span style={D.title}>Quizzes</span>
           <button
             onClick={() => setShowGenerateForm(!showGenerateForm)}
+            className="rounded-full"
             style={D.generateBtn(showGenerateForm)}
           >
             <span>+</span> Generate Quiz
@@ -219,10 +220,10 @@ export default function QuizList({ onSelectQuiz }: QuizListProps) {
               </select>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={handleGenerateQuiz} disabled={generating} style={D.actionBtn(true)}>
+              <button onClick={handleGenerateQuiz} disabled={generating} className="rounded-full" style={D.actionBtn(true)}>
                 {generating ? 'Generating...' : 'Generate'}
               </button>
-              <button onClick={() => setShowGenerateForm(false)} style={D.actionBtn()}>Cancel</button>
+              <button onClick={() => setShowGenerateForm(false)} className="rounded-full" style={D.actionBtn()}>Cancel</button>
             </div>
             {error && (
               <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'rgba(255,80,80,0.08)', border: '1px solid rgba(255,80,80,0.15)', color: 'hsl(0 60% 65%)', fontSize: '0.78rem' }}>

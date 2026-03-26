@@ -83,11 +83,11 @@ export default function VoiceInput({ onTranscription, onError }: VoiceInputProps
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={isProcessing}
-        className={`p-3 rounded-full transition-all ${
+        className={`p-3 rounded-full transition-all flex items-center justify-center ${
           isRecording
-            ? 'bg-red-500 hover:bg-red-600 animate-pulse'
-            : 'bg-primary hover:opacity-90'
-        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''} text-white`}
+            ? 'bg-red-500 hover:bg-red-600 animate-pulse text-white'
+            : 'btn-pill-primary'
+        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
         title={isRecording ? 'Stop recording' : 'Start voice input'}
       >
         {isProcessing ? (
