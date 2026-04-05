@@ -64,17 +64,106 @@ GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizz
 - Streak tracking for daily engagement
 - Categories: upload, quiz, streak, mastery, exploration
 
-### Attention Monitoring
-- Webcam-based attention detection using MediaPipe
-- Real-time engagement scoring
-- Smart intervention suggestions when attention drifts
-- WebSocket streaming for live monitoring
+### Attention Monitoring & Focus Tracker
+- **Eye Detection Focus Tracker**: Real-time webcam-based attention monitoring
+- Detects when user is looking away (head turned, face blocked, or distracted)
+- Hybrid detection system: MediaPipe Face Mesh (primary) + Haar Cascade (fallback)
+- Head pose detection using Haar Cascade classifier for side-facing detection
+- Hysteresis algorithm prevents false positives from frame-to-frame noise
+- Shows persistent "Keep Focus" popup overlay after 5 seconds of sustained focus loss
+- Silent background tracking (no UI tab interference) with optional debug indicator
+- Dashboard-only tracking (not on landing page)
+- Real-time debug status showing focus level in top-right corner
+- Analyzes brightness, contrast, edge detection, and face positioning
 
 ### Accessibility
 - OpenDyslexic font toggle for dyslexia support
 - High contrast mode (black/white/yellow)
 - Adjustable font sizes (normal, large, extra-large)
 - Reduced motion mode
+
+---
+
+## Eye Detection Focus Tracker (NEW!)
+
+The **Eye Detection Focus Tracker** is a real-time attention monitoring system that keeps students engaged by detecting when they look away from the screen.
+
+### How It Works
+
+**Detection Methods:**
+1. **MediaPipe Face Mesh** (primary): Extracts 468 facial landmarks for eye aspect ratio (EAR) calculation and gaze direction estimation
+2. **Haar Cascade Classifier** (fallback): Detects front-facing faces with windowed positioning for head pose
+3. **Image Analysis** (fallback): Brightness, variance, and Laplacian sharpness analysis for non-face scenarios
+
+**Three Focus-Loss Scenarios:**
+- **Face Blocked**: Hand in front of camera → `face_detected: false`
+- **Head Turned**: Looking to side → Face detected but off-center
+- **Looking Away**: Facing other direction → Brightness/detail analysis fails
+
+**Hysteresis Algorithm:**
+- Prevents fluttering between focused/unfocused states on frame-to-frame noise
+- Uses stricter thresholds when already "looking away" (maintains state unless clear evidence to switch)
+- Uses lenient thresholds when "focused" (difficult to trigger false "looking away")
+
+**Threshold & Popup:**
+- Requires **5 consecutive seconds** (5 frames @ 1 fps) of focus loss before showing popup
+- Counter resets immediately when focus is restored
+- Overlay shows pulsing 👁️ emoji with "Keep Focus" message and dark blur background
+- Only appears on dashboard (not landing page)
+
+**Debug Indicator:**
+- Located in top-right corner of dashboard
+- Shows real-time status: "✓ Focused", "Looking away (3/5)", "Detecting face", etc.
+- Minimal footprint (doesn't block UI)
+
+### Technical Details
+
+**Metrics Returned by `/multimodal/analyze-attention`:**
+```json
+{
+  "face_detected": true,
+  "looking_at_screen": true,
+  "attention_level": "high",
+  "blink_rate": 15,
+  "is_fatigued": false,
+  "debug": "brightness=120.5, var=450.2, laplacian=250.8, face_centered=true"
+}
+```
+
+**Configuration:**
+- Analysis frequency: **1-second intervals** (adjustable in GlobalFocusTracker.tsx: `analyzeFrame()`)
+- Frame quality: **50% JPEG compression** for faster processing
+- Video resolution: **320x240** (optimal for face detection speed)
+- Threshold for brightness: **35-225 range**
+- Threshold for variance: **70-85 pixels**
+- Threshold for Laplacian sharpness: **90-110**
+
+**Processing Pipeline:**
+```
+Frame Capture
+    ↓
+Base64 Encoding
+    ↓
+POST to /multimodal/analyze-attention
+    ↓
+Backend tries MediaPipe
+    ↓ (fails)
+Falls back to Haar Cascade + brightness analysis
+    ↓
+Returns metrics JSON
+    ↓
+Frontend counts consecutive losses
+    ↓ (>=5)
+Shows popup with blur overlay
+```
+
+### Privacy & Performance
+
+- **100% Local Processing**: All detection runs on your machine (no cloud APIs)
+- **Lightweight**: Haar Cascade is ~100KB, runs in <50ms per frame
+- **Battery Efficient**: 1-second analysis interval (not continuous)
+- **Optional**: Debug indicator can be hidden; tracker runs silently in background
+- **No Recording**: Only processes real-time frames; nothing stored
 
 ---
 
@@ -90,7 +179,7 @@ GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizz
 | **Frontend** | Next.js 14 + TypeScript + Tailwind CSS |
 | **Animations** | Framer Motion |
 | **Diagrams** | Mermaid.js |
-| **Attention** | OpenCV + MediaPipe |
+| **Attention** | MediaPipe + OpenCV + Haar Cascade |
 | **TTS** | pyttsx3 + Browser SpeechSynthesis API |
 
 ---
@@ -101,24 +190,66 @@ GuruCortex transforms how you learn by combining RAG-powered Q&A, adaptive quizz
                     +------------------+
                     |   Browser        |
                     |   localhost:3000  |
-                    +--------+---------+
-                             |
-                    +--------v---------+
-                    |   Next.js 14     |
-                    |   (Frontend)     |
-                    +--------+---------+
-                             |  Axios
-                    +--------v---------+
-                    |   FastAPI        |
-                    |   localhost:8000  |
-                    +---+----+----+----+
-                        |    |    |
-              +---------+  +-+    +----------+
-              |            |                 |
-     +--------v---+  +----v------+  +-------v-------+
-     |  ChromaDB  |  |  SQLite   |  |    Ollama     |
-     | (Vectors)  |  | (13 tbl)  |  | (Mistral-7B)  |
-     +------------+  +-----------+  +---------------+
+                    ├────────┬─────────┤
+                    |  Webcam|         |
+                    +────┬───┴──┬──────+
+                         |      |
+              +──────────+      |
+              |                 |
+        +-----v--------+ +------v---------+
+        |GlobalFocus   | |   Next.js 14   |
+        |Tracker       | |   (Frontend)   |
+        |(React)       | +-------┬--------+
+        +-----┬--------+         |  Axios
+              |                  |
+              +/analyze-attention|
+                +────────────────v---------+
+                     |   FastAPI        |
+                     |   localhost:8000  |
+                     +---+----+----+-----+
+                         |    |    |
+                  +──────┘    |    └──────┬─────┐
+                  |           |           |     |
+        ┌─────────v──┐ ┌──────v──┐ ┌─────v──┐ ┌v─────────┐
+        │  ChromaDB  │ │ SQLite  │ │ Ollama │ │ Vision   │
+        │ (Vectors)  │ │ (Data)  │ │ (LLM)  │ │ Analysis │
+        └────────────┘ └─────────┘ └────────┘ │ (OpenCV, │
+                                               │ MediaPipe│
+                                               │ Cascade) │
+                                               └──────────┘
+```
+
+**Vision Pipeline Details:**
+```
+Webcam Frame
+    ↓
+GlobalFocusTracker.tsx (Frontend)
+    ├→ Base64 encode frame
+    └→ POST /multimodal/analyze-attention
+         ↓
+AttentionTracker.py (Backend)
+    ├→ Try MediaPipe Face Mesh (primary)
+    │  ├→ Detect face landmarks
+    │  ├→ Calculate eye aspect ratio (EAR)
+    │  └→ Estimate gaze direction
+    │
+    ├→ Fall back to Haar Cascade
+    │  ├→ Detect face position
+    │  ├→ Check if centered
+    │  └→ Accept/reject based on position
+    │
+    └→ Fall back to Image Analysis
+       ├→ Brightness analysis (35-225 range)
+       ├→ Variance calculation (70-85 threshold)
+       └→ Laplacian sharpness (90-110 threshold)
+            ↓
+        Return JSON metrics
+            ↓
+        Frontend applies hysteresis
+            ↓
+        Counter logic (5-second threshold)
+            ↓
+        Popup or debug indicator
 ```
 
 ---
@@ -255,10 +386,43 @@ Double-click stop.bat
 ### Multimodal
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/multimodal/analyze-attention` | Analyze webcam frame |
+| `POST` | `/multimodal/analyze-attention` | 🆕 Eye detection focus tracker (webcam frame analysis) |
 | `POST` | `/multimodal/transcribe-voice` | Voice to text |
 | `POST` | `/multimodal/synthesize-speech` | Text to speech |
 | `WS` | `/multimodal/attention-stream` | Real-time attention |
+
+**Eye Detection Focus Tracker - `/multimodal/analyze-attention`**
+
+Request body:
+```json
+{
+  "image_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABA..."
+}
+```
+
+Response:
+```json
+{
+  "face_detected": true,
+  "looking_at_screen": true,
+  "attention_level": "high",
+  "blink_rate": 14.5,
+  "is_fatigued": false,
+  "gaze_alignment": 0.85,
+  "intervention_needed": false,
+  "debug": "brightness=128.3, var=475.2, laplacian=265.1, face_centered=true"
+}
+```
+
+**Field Descriptions:**
+- `face_detected` (bool): Whether a face was detected in the frame
+- `looking_at_screen` (bool): Whether the detected face is looking at the screen (combination of centered position + brightness + contrast)
+- `attention_level` (str): One of `high`, `medium`, `low`
+- `blink_rate` (float): Blinks per minute (15-20 normal, >20 fatigued)
+- `is_fatigued` (bool): True if blink rate exceeds threshold
+- `gaze_alignment` (float): Score 0-1 indicating how aligned gaze is with screen center
+- `intervention_needed` (bool): True if intervention message should be shown
+- `debug` (str): Detailed metrics for troubleshooting
 
 Full interactive API docs at **http://localhost:8000/docs**
 
@@ -299,7 +463,7 @@ gurucortex/
 │   │       ├── topic_extractor.py
 │   │       ├── mastery_tracker.py
 │   │       ├── analytics_engine.py
-│   │       ├── attention_tracker.py
+│   │       ├── attention_tracker.py   # 🆕 Eye detection with MediaPipe + Haar Cascade
 │   │       ├── voice_input.py
 │   │       └── text_to_speech.py
 │   ├── requirements.txt
@@ -323,6 +487,7 @@ gurucortex/
 │   │   ├── ProtegeMode.tsx            # Teach-back
 │   │   ├── StudyPlanner.tsx           # Study plans
 │   │   ├── BadgesDisplay.tsx          # Gamification
+│   │   ├── GlobalFocusTracker.tsx     # 🆕 Eye detection focus tracker (webcam)
 │   │   ├── AttentionMonitor.tsx       # Focus tracking
 │   │   ├── VoiceInput.tsx             # Voice input
 │   │   ├── AccessibilityToggle.tsx    # Accessibility
