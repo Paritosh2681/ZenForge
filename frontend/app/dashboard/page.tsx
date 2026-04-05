@@ -13,10 +13,11 @@ import BadgesDisplay from '@/components/BadgesDisplay';
 import PodcastPlayer from '@/components/PodcastPlayer';
 import ProtegeMode from '@/components/ProtegeMode';
 import AccessibilityToggle from '@/components/AccessibilityToggle';
+import GlobalFocusTracker from '@/components/GlobalFocusTracker';
 import { 
   MessageSquare, FileText, Code, 
   ClipboardList, GraduationCap, Headphones, 
-  BarChart2, Award, CalendarDays, Eye 
+  BarChart2, Award, CalendarDays 
 } from 'lucide-react';
 type Tab = 'chat' | 'documents' | 'assessments' | 'analytics' | 'attention' | 'code' | 'planner' | 'badges' | 'podcast' | 'protege';
 
@@ -43,7 +44,6 @@ const tabGroups = [
       { id: 'analytics' as Tab, label: 'Stats', icon: <BarChart2 size={15} strokeWidth={2.5} /> },
       { id: 'badges' as Tab, label: 'Badges', icon: <Award size={15} strokeWidth={2.5} /> },
       { id: 'planner' as Tab, label: 'Plan', icon: <CalendarDays size={15} strokeWidth={2.5} /> },
-      { id: 'attention' as Tab, label: 'Focus', icon: <Eye size={15} strokeWidth={2.5} /> },
     ],
   },
 ];
@@ -52,7 +52,9 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('chat');
 
   return (
-    <div
+    <>
+      <GlobalFocusTracker />
+      <div
       style={{
         height: '100vh',
         display: 'flex',
@@ -317,6 +319,7 @@ export default function Dashboard() {
         )}
       </main>
     </div>
+    </>
   );
 }
 

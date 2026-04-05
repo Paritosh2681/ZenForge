@@ -68,44 +68,129 @@ class TTSRequest(BaseModel):
 async def analyze_attention(request: AttentionAnalysisRequest):
     """Analyze student attention from webcam frame"""
     try:
-        tracker = get_attention_tracker()
-
-        # Decode base64 image
-        image_data = base64.b64decode(request.image_base64.split(",")[1] if "," in request.image_base64 else request.image_base64)
-        nparr = np.frombuffer(image_data, np.uint8)
-        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-        # Analyze frame
-        metrics = tracker.analyze_frame(frame)
-
-        if metrics is None:
+        # Validate request
+        if not request.image_base64:
             return {
                 "face_detected": False,
-                "message": "No face detected. Please ensure your face is visible in the camera."
+                "looking_at_screen": False,
+                "attention_level": "low",
+                "message": "No image provided"
             }
 
-        # Check if intervention needed
-        intervention = tracker.get_intervention_recommendation(metrics)
+        try:
+            # Quick validation - check if image base64 is valid and not empty
+            image_base64 = request.image_base64.split(",")[1] if "," in request.image_base64 else request.image_base64
+            
+            if not image_base64 or len(image_base64) < 100:  # Minimum valid image size
+                return {
+                    "face_detected": False,
+                    "looking_at_screen": False,
+                    "attention_level": "low",
+                    "blink_rate": 0,
+                    "is_fatigued": False,
+                    "message": "Invalid image - too small"
+                }
 
-        response = {
-            **metrics,
-            "intervention_needed": intervention is not None,
-            "intervention_type": intervention
-        }
+            if not CV2_AVAILABLE:
+                logger.warning("CV2 not available - returning safe response")
+                # Can't analyze without CV2
+                return {
+                    "face_detected": False,
+                    "looking_at_screen": False,
+                    "attention_level": "low",
+                    "blink_rate": 0,
+                    "is_fatigued": False,
+                    "message": "OpenCV not available"
+                }
 
-        # Add intervention messages
-        if intervention:
-            messages = {
-                "fatigue_detected": "You seem tired. Consider taking a short break!",
-                "attention_drift": "Let's refocus! The content is getting interesting.",
-                "low_engagement": "How about we try a different approach to this topic?"
+            # Try to decode and analyze the frame
+            image_data = base64.b64decode(image_base64)
+            nparr = np.frombuffer(image_data, np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            if frame is None or frame.size == 0:
+                logger.warning("Failed to decode frame from base64")
+                return {
+                    "face_detected": False,
+                    "looking_at_screen": False,
+                    "attention_level": "low",
+                    "blink_rate": 0,
+                    "is_fatigued": False,
+                    "message": "Invalid image format"
+                }
+
+            # Analyze frame with attention tracker
+            tracker = get_attention_tracker()
+            if tracker is None:
+                logger.warning("AttentionTracker not available")
+                # Return safe fallback response
+                return {
+                    "face_detected": False,
+                    "looking_at_screen": False,
+                    "attention_level": "low",
+                    "blink_rate": 0,
+                    "is_fatigued": False,
+                    "message": "Tracker unavailable"
+                }
+
+            # analyze_frame handles both MediaPipe and fallback detection
+            metrics = tracker.analyze_frame(frame)
+
+            if metrics is None:
+                # No face, return accurately
+                return {
+                    "face_detected": False,
+                    "looking_at_screen": False,
+                    "attention_level": "low",
+                    "blink_rate": 0,
+                    "is_fatigued": False,
+                    "message": "No face detected"
+                }
+
+            # Check if intervention needed
+            intervention = tracker.get_intervention_recommendation(metrics)
+
+            response = {
+                **metrics,
+                "intervention_needed": intervention is not None,
+                "intervention_type": intervention
             }
-            response["intervention_message"] = messages.get(intervention, "")
 
-        return response
+            # Add intervention messages
+            if intervention:
+                messages = {
+                    "fatigue_detected": "You seem tired. Consider taking a short break!",
+                    "attention_drift": "Let's refocus! The content is getting interesting.",
+                    "low_engagement": "How about we try a different approach to this topic?"
+                }
+                response["intervention_message"] = messages.get(intervention, "")
+
+            logger.info(f"Attention analysis success: face_detected={metrics.get('face_detected')}, attention_level={metrics.get('attention_level')}")
+            return response
+
+        except Exception as inner_error:
+            logger.error(f"Error in frame analysis: {str(inner_error)}", exc_info=True)
+            # Return safe fallback response instead of erroring
+            return {
+                "face_detected": False,
+                "looking_at_screen": False,
+                "attention_level": "low",
+                "blink_rate": 0,
+                "is_fatigued": False,
+                "error": str(inner_error)
+            }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Attention analysis failed: {str(e)}")
+        logger.error(f"Attention analysis endpoint error: {str(e)}", exc_info=True)
+        # Return error response instead of 500
+        return {
+            "face_detected": False,
+            "looking_at_screen": False,
+            "attention_level": "low",
+            "blink_rate": 0,
+            "is_fatigued": False,
+            "error": str(e)
+        }
 
 @router.post("/transcribe-voice")
 async def transcribe_voice(

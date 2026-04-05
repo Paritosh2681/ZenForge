@@ -28,10 +28,11 @@ export default function SessionSidebar({
       setLoading(true);
       setError(null);
       const data = await api.listConversations(50, 0, false);
-      setConversations(data.conversations);
+      setConversations(data?.conversations || []);
     } catch (err) {
       console.error('Failed to load conversations:', err);
       setError('Failed to load conversations');
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -141,13 +142,13 @@ export default function SessionSidebar({
           </div>
         )}
 
-        {!loading && !error && conversations.length === 0 && (
+        {!loading && !error && conversations && conversations.length === 0 && (
           <div style={{ padding: '1.5rem 1rem', textAlign: 'center', fontSize: '0.78rem', color: 'hsl(220 10% 38%)', fontFamily: "var(--font-outfit), sans-serif" }}>
             No conversations yet
           </div>
         )}
 
-        {!loading && !error && conversations.map((conversation) => {
+        {!loading && !error && conversations && conversations.map((conversation) => {
           const isActive = conversation.id === currentConversationId;
           return (
             <div
