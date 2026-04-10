@@ -27,6 +27,7 @@ class RAGEngine:
         self,
         user_query: str,
         conversation_id: str = None,
+        document_ids: Optional[List[str]] = None,
         include_sources: bool = True,
         generate_diagram: bool = True
     ) -> ChatResponse:
@@ -52,7 +53,10 @@ class RAGEngine:
             logger.warning(f"Failed to load conversation history: {e}. Proceeding without history.")
 
         # Step 1: Retrieve relevant chunks from vector store
-        retrieved_chunks = self.vector_store.query(user_query)
+        retrieved_chunks = self.vector_store.query(
+            user_query,
+            document_ids=document_ids,
+        )
 
         if not retrieved_chunks:
             # No relevant context found
@@ -88,14 +92,19 @@ class RAGEngine:
             system_prompt=self._get_system_prompt()
         )
 
-        # Extract RAG context texts
-        context_texts = [chunk["content"] for chunk in retrieved_chunks]
-
+        history_text = context_window.get("conversation_history", "")
+        
         # Step 3: Generate response using LLM with full context (history + RAG)
+        context_texts = [chunk["content"] for chunk in retrieved_chunks]
+        
+        if history_text:
+            context_texts.append(f"--- Conversation History ---\n{history_text}")
+
         generation_result = await self.llm_client.generate_with_context(
             query=user_query,
             context_chunks=context_texts,
-            generate_diagram=generate_diagram
+            generate_diagram=generate_diagram,
+            system_prompt=context_window.get("system_prompt")
         )
 
         response_text = generation_result["response"]
@@ -170,15 +179,26 @@ Your approach:
 4. Encourage critical thinking and active learning
 5. When appropriate, generate Mermaid diagrams to visualize concepts
 
+CRITICAL RULES FOR ACCURACY:
+- ONLY answer using the provided "Context from study materials".
+- If the answer cannot be found in the context, explicitly say "I do not have enough information in the provided context to answer this." Do not make up information or hallucinate facts that are not in the uploaded documents.
+- Consider the conversation history to maintain context, but prioritize the uploaded document context for facts.
+
 Remember:
 - Be patient and supportive
-- Acknowledge when you don't know something
-- Use the provided context from study materials
-- Consider the conversation history to maintain context"""
+- Acknowledge when you don't know something"""
 
     async def index_document(self, chunks: List[Dict[str, Any]]) -> int:
         """Index document chunks into vector store"""
         return self.vector_store.add_documents(chunks)
+
+    async def remove_document(self, document_id: str) -> bool:
+        """Remove all chunks for a document from the vector store."""
+        try:
+            return await self.vector_store.remove_document(document_id)
+        except Exception as e:
+            logger.error(f"Failed to remove document {document_id} from vector store: {e}")
+            return False
 
     async def health_check(self) -> Dict[str, Any]:
         """Check health of RAG components"""

@@ -8,6 +8,8 @@ from typing import Optional, Dict
 from pathlib import Path
 import tempfile
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -32,9 +34,13 @@ class TextToSpeechService:
         Args:
             use_advanced: Use Coqui TTS (better quality) vs pyttsx3 (lightweight)
         """
-        self.use_advanced = use_advanced
+        # In local-only mode, avoid network-triggering model downloads and use offline fallback.
+        self.use_advanced = use_advanced and not settings.LOCAL_MODEL_ONLY
 
-        if use_advanced and TTS is not None:
+        if use_advanced and settings.LOCAL_MODEL_ONLY:
+            print("LOCAL_MODEL_ONLY enabled. Skipping Coqui download path and using offline fallback.")
+
+        if self.use_advanced and TTS is not None:
             try:
                 # Initialize Coqui TTS (supports multiple languages)
                 print("Loading Coqui TTS model...")
@@ -46,7 +52,7 @@ class TextToSpeechService:
                 self.use_advanced = False
                 self._init_fallback()
         else:
-            if use_advanced:
+            if self.use_advanced:
                 print("Coqui TTS not installed or disabled. Using pyttsx3 fallback.")
             self.use_advanced = False
             self._init_fallback()
@@ -73,10 +79,14 @@ class TextToSpeechService:
 
     def _init_fallback(self):
         """Initialize lightweight pyttsx3 engine"""
+        if not PYTTSX3_AVAILABLE:
+            self.fallback = None
+            logger.warning("pyttsx3 is not installed. Text-to-speech fallback unavailable.")
+            return
+
         self.fallback = pyttsx3.init()
-        # Configure voice properties
-        self.fallback.setProperty('rate', 150)  # Speech rate
-        self.fallback.setProperty('volume', 0.9)  # Volume (0-1)
+        self.fallback.setProperty('rate', 150)
+        self.fallback.setProperty('volume', 0.9)
 
     def synthesize(
         self,
@@ -126,6 +136,14 @@ class TextToSpeechService:
 
             else:
                 # Use pyttsx3 fallback
+                if self.fallback is None:
+                    return {
+                        "success": False,
+                        "error": "No local TTS engine available. Install pyttsx3 or pre-cache Coqui models.",
+                        "text": text,
+                        "language": language,
+                    }
+
                 self.fallback.save_to_file(text, output_path)
                 self.fallback.runAndWait()
 
@@ -187,5 +205,5 @@ class TextToSpeechService:
         """Delete temporary audio file"""
         try:
             Path(audio_path).unlink(missing_ok=True)
-        except:
+        except Exception:
             pass

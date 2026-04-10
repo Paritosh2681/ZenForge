@@ -7,7 +7,15 @@ import QuizResults from './QuizResults';
 
 type ViewMode = 'list' | 'taking' | 'results';
 
-export default function AssessmentHub() {
+interface AssessmentHubProps {
+  selectedDocumentIds?: string[];
+  selectedDocumentNames?: string[];
+}
+
+export default function AssessmentHub({
+  selectedDocumentIds = [],
+  selectedDocumentNames = [],
+}: AssessmentHubProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -36,7 +44,13 @@ export default function AssessmentHub() {
 
   return (
     <div className="h-full">
-      {viewMode === 'list' && <QuizList onSelectQuiz={handleSelectQuiz} />}
+      {viewMode === 'list' && (
+        <QuizList
+          onSelectQuiz={handleSelectQuiz}
+          selectedDocumentIds={selectedDocumentIds}
+          selectedDocumentNames={selectedDocumentNames}
+        />
+      )}
 
       {viewMode === 'taking' && selectedQuizId && (
         <QuizInterface

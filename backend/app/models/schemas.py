@@ -21,11 +21,29 @@ class DocumentMetadata(BaseModel):
     total_chunks: int
     total_pages: Optional[int] = None
 
+
+class DocumentListItem(BaseModel):
+    """Document entry returned by the document manager"""
+    document_id: str
+    filename: str
+    file_type: str
+    file_size: int
+    chunks_created: int
+    total_pages: Optional[int] = None
+    upload_date: datetime
+
+
+class DocumentListResponse(BaseModel):
+    """List of uploaded documents"""
+    documents: List[DocumentListItem]
+    total: int
+
 # Chat & RAG
 class ChatRequest(BaseModel):
     """User query to the RAG system"""
     query: str = Field(..., min_length=1, max_length=2000)
     conversation_id: Optional[str] = None
+    document_ids: Optional[List[str]] = None
     include_sources: bool = True
     generate_diagram: bool = True  # Auto-generate Mermaid if applicable
 

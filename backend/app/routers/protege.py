@@ -149,7 +149,7 @@ IMPROVE: [1-2 areas to improve]"""
                     try:
                         val = line.split(':')[1].strip().split('/')[0].strip()
                         scores[key.lower()] = int(val)
-                    except:
+                    except (ValueError, IndexError):
                         scores[key.lower()] = 5
             if line.upper().startswith('FEEDBACK:'):
                 feedback = line.split(':', 1)[1].strip()

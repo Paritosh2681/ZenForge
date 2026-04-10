@@ -8,7 +8,6 @@ interface AccessibilitySettings {
   fontSize: 'normal' | 'large' | 'xl';
   reducedMotion: boolean;
 }
-import { Accessibility } from 'lucide-react';
 
 export default function AccessibilityToggle() {
   const [settings, setSettings] = useState<AccessibilitySettings>({
@@ -71,85 +70,59 @@ export default function AccessibilityToggle() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="rounded-full transition-all duration-200"
-        style={{
-          padding: '0.45rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: open ? 'hsl(220 80% 75%)' : 'hsl(220 15% 85%)',
-          background: open ? 'rgba(80,120,255,0.14)' : 'transparent',
-          border: open ? '1px solid rgba(80,120,255,0.28)' : '1px solid transparent',
-        }}
+        className="p-2 rounded-lg hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
         title="Accessibility Settings"
         aria-label="Accessibility Settings"
       >
-        <Accessibility size={16} strokeWidth={2.5} />
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><circle cx="12" cy="7" r="1.5"/><path d="M12 9v3m-3.5 1.5L12 12l3.5 1.5M9 17l1.5-3M15 17l-1.5-3"/>
+        </svg>
       </button>
 
       {open && (
-        <div style={{
-          position: 'absolute',
-          right: 0,
-          top: '100%',
-          marginTop: '0.5rem',
-          width: '20rem',
-          background: 'rgba(14,15,30,0.85)',
-          backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          zIndex: 50,
-          padding: '1.25rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1.25rem',
-          fontFamily: "var(--font-outfit), sans-serif",
-          boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-        }}>
-          <div className="flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem' }}>
-            <h3 style={{ fontWeight: 600, fontSize: '0.9rem', color: 'hsl(220 15% 90%)' }}>Accessibility</h3>
-            <button onClick={() => setOpen(false)} style={{ color: 'hsl(220 10% 50%)', fontSize: '1.1rem' }}>&#10005;</button>
+        <div className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-xl shadow-lg z-50 p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Accessibility</h3>
+            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground text-xs">&#10005;</button>
           </div>
 
           {/* Dyslexia Font */}
-          <div className="flex items-center justify-between cursor-pointer" onClick={() => updateSetting('dyslexiaFont', !settings.dyslexiaFont)}>
+          <label className="flex items-center justify-between cursor-pointer">
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'hsl(220 15% 85%)' }}>Dyslexia-Friendly Font</div>
-              <div style={{ fontSize: '0.75rem', color: 'hsl(220 10% 50%)', marginTop: '2px' }}>OpenDyslexic font for easier reading</div>
+              <div className="text-sm font-medium">Dyslexia-Friendly Font</div>
+              <div className="text-xs text-muted-foreground">OpenDyslexic font for easier reading</div>
             </div>
-            <div style={{ width: '2.5rem', height: '1.25rem', borderRadius: '9999px', background: settings.dyslexiaFont ? 'hsl(220 80% 62%)' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'all 0.2s ease' }}>
-              <div style={{ position: 'absolute', top: '2px', left: settings.dyslexiaFont ? 'calc(100% - 1.125rem - 2px)' : '2px', width: '1rem', height: '1rem', background: '#fff', borderRadius: '50%', transition: 'all 0.2s ease' }} />
-            </div>
-          </div>
+            <button
+              onClick={() => updateSetting('dyslexiaFont', !settings.dyslexiaFont)}
+              className={`w-10 h-5 rounded-full transition-colors relative ${settings.dyslexiaFont ? 'bg-primary' : 'bg-secondary'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${settings.dyslexiaFont ? 'left-5' : 'left-0.5'}`} />
+            </button>
+          </label>
 
           {/* High Contrast */}
-          <div className="flex items-center justify-between cursor-pointer" onClick={() => updateSetting('highContrast', !settings.highContrast)}>
+          <label className="flex items-center justify-between cursor-pointer">
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'hsl(220 15% 85%)' }}>High Contrast</div>
-              <div style={{ fontSize: '0.75rem', color: 'hsl(220 10% 50%)', marginTop: '2px' }}>Increased contrast for visibility</div>
+              <div className="text-sm font-medium">High Contrast</div>
+              <div className="text-xs text-muted-foreground">Increased contrast for visibility</div>
             </div>
-            <div style={{ width: '2.5rem', height: '1.25rem', borderRadius: '9999px', background: settings.highContrast ? 'hsl(220 80% 62%)' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'all 0.2s ease' }}>
-              <div style={{ position: 'absolute', top: '2px', left: settings.highContrast ? 'calc(100% - 1.125rem - 2px)' : '2px', width: '1rem', height: '1rem', background: '#fff', borderRadius: '50%', transition: 'all 0.2s ease' }} />
-            </div>
-          </div>
+            <button
+              onClick={() => updateSetting('highContrast', !settings.highContrast)}
+              className={`w-10 h-5 rounded-full transition-colors relative ${settings.highContrast ? 'bg-primary' : 'bg-secondary'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${settings.highContrast ? 'left-5' : 'left-0.5'}`} />
+            </button>
+          </label>
 
           {/* Font Size */}
           <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'hsl(220 15% 85%)', marginBottom: '0.5rem' }}>Font Size</div>
-            <div className="flex gap-2">
+            <div className="text-sm font-medium mb-1">Font Size</div>
+            <div className="flex gap-1">
               {(['normal', 'large', 'xl'] as const).map(size => (
                 <button key={size} onClick={() => updateSetting('fontSize', size)}
-                  style={{
-                    flex: 1,
-                    padding: '0.4rem 0',
-                    fontSize: '0.78rem',
-                    fontWeight: 500,
-                    textAlign: 'center',
-                    textTransform: 'capitalize',
-                    transition: 'all 0.15s ease',
-                    ...(settings.fontSize === size 
-                      ? { background: 'rgba(80,120,255,0.18)', border: '1px solid rgba(80,120,255,0.28)', color: 'hsl(220 80% 75%)' }
-                      : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'hsl(220 10% 60%)' })
-                  }}>
+                  className={`flex-1 py-1.5 text-xs rounded-lg capitalize transition-colors ${
+                    settings.fontSize === size ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
+                  }`}>
                   {size === 'xl' ? 'Extra Large' : size}
                 </button>
               ))}
@@ -157,32 +130,23 @@ export default function AccessibilityToggle() {
           </div>
 
           {/* Reduced Motion */}
-          <div className="flex items-center justify-between cursor-pointer" onClick={() => updateSetting('reducedMotion', !settings.reducedMotion)}>
+          <label className="flex items-center justify-between cursor-pointer">
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 500, color: 'hsl(220 15% 85%)' }}>Reduced Motion</div>
-              <div style={{ fontSize: '0.75rem', color: 'hsl(220 10% 50%)', marginTop: '2px' }}>Minimize animations</div>
+              <div className="text-sm font-medium">Reduced Motion</div>
+              <div className="text-xs text-muted-foreground">Minimize animations</div>
             </div>
-            <div style={{ width: '2.5rem', height: '1.25rem', borderRadius: '9999px', background: settings.reducedMotion ? 'hsl(220 80% 62%)' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'all 0.2s ease' }}>
-              <div style={{ position: 'absolute', top: '2px', left: settings.reducedMotion ? 'calc(100% - 1.125rem - 2px)' : '2px', width: '1rem', height: '1rem', background: '#fff', borderRadius: '50%', transition: 'all 0.2s ease' }} />
-            </div>
-          </div>
+            <button
+              onClick={() => updateSetting('reducedMotion', !settings.reducedMotion)}
+              className={`w-10 h-5 rounded-full transition-colors relative ${settings.reducedMotion ? 'bg-primary' : 'bg-secondary'}`}
+            >
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${settings.reducedMotion ? 'left-5' : 'left-0.5'}`} />
+            </button>
+          </label>
 
           {/* Reset */}
           <button
             onClick={() => { updateSetting('dyslexiaFont', false); updateSetting('highContrast', false); updateSetting('fontSize', 'normal'); updateSetting('reducedMotion', false); }}
-            style={{
-              width: '100%',
-              padding: '0.6rem',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'hsl(220 15% 85%)',
-              marginTop: '0.5rem',
-              transition: 'background 0.15s ease'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+            className="w-full py-1.5 text-xs bg-secondary hover:bg-secondary/80 rounded-lg transition-colors"
           >
             Reset to Default
           </button>

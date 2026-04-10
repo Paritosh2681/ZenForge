@@ -95,12 +95,11 @@ export default function ConversationHeader({
 
   if (!conversation) {
     return (
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div style={{ background: 'rgba(80,120,255,0.12)', border: '1px solid rgba(80,120,255,0.25)' }} className="w-8 h-8 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-[#22C55E] flex items-center justify-center shadow-[0_0_10px_rgba(34,197,94,0.4)]">
             <svg
-              className="w-5 h-5 flex-shrink-0"
-              style={{ color: 'hsl(220 80% 75%)' }}
+              className="w-5 h-5 text-[#0D0D0D]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -113,7 +112,7 @@ export default function ConversationHeader({
               />
             </svg>
           </div>
-          <span style={{ color: 'hsl(220 15% 90%)' }} className="text-lg font-semibold">
+          <span className="text-lg font-semibold text-white">
             New Conversation
           </span>
         </div>
@@ -122,13 +121,12 @@ export default function ConversationHeader({
   }
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+    <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0a0f1c]">
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {/* Icon */}
-        <div style={{ background: 'rgba(80,120,255,0.12)', border: '1px solid rgba(80,120,255,0.25)' }} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-[#22C55E] flex items-center justify-center flex-shrink-0 shadow-[0_0_10px_rgba(34,197,94,0.4)]">
           <svg
-            className="w-5 h-5 flex-shrink-0"
-            style={{ color: 'hsl(220 80% 75%)' }}
+            className="w-5 h-5 text-[#0D0D0D]"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -152,7 +150,7 @@ export default function ConversationHeader({
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleSaveEdit}
-              className="flex-1 px-2 py-1 text-lg font-semibold bg-gray-100 dark:bg-gray-700 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100"
+              className="flex-1 px-2 py-1 text-lg font-semibold bg-[#0D1421] border border-[#22C55E] rounded focus:outline-none focus:ring-2 focus:ring-[#22C55E] text-white"
               maxLength={100}
             />
           </div>
@@ -161,11 +159,11 @@ export default function ConversationHeader({
             onClick={handleStartEdit}
             className="flex items-center gap-2 group flex-1 min-w-0 text-left"
           >
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+            <h1 className="text-lg font-semibold text-white truncate">
               {conversation.title}
             </h1>
             <svg
-              className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+              className="w-4 h-4 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

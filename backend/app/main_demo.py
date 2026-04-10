@@ -82,7 +82,7 @@ async def health():
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.get("http://localhost:11434/api/tags")
             ollama_status = response.status_code == 200
-    except:
+    except Exception:
         pass
 
     return {
@@ -252,7 +252,7 @@ async def chat_health():
         async with httpx.AsyncClient(timeout=httpx.Timeout(5.0)) as client:
             response = await client.get("http://localhost:11434/api/tags")
             ollama_healthy = response.status_code == 200
-    except:
+    except Exception:
         pass
 
     return {

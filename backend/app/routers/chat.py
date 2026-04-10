@@ -25,6 +25,7 @@ async def chat_query(request: ChatRequest):
         response = await rag_engine.query(
             user_query=request.query,
             conversation_id=conversation_id,
+            document_ids=request.document_ids,
             include_sources=request.include_sources,
             generate_diagram=request.generate_diagram
         )

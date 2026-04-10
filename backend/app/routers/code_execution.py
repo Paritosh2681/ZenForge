@@ -46,6 +46,7 @@ async def execute_code(request: CodeRequest):
 
     execution_id = str(uuid.uuid4())
     start_time = time.time()
+    temp_path = None
 
     # Write code to temp file and execute
     try:
@@ -77,10 +78,11 @@ async def execute_code(request: CodeRequest):
         output = ""
         error = str(e)
     finally:
-        try:
-            os.unlink(temp_path)
-        except:
-            pass
+        if temp_path:
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
 
     # Save to database
     try:

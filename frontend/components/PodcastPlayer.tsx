@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import api from '@/lib/api-client';
 
 interface Segment {
@@ -27,6 +27,7 @@ export default function PodcastPlayer() {
   const [currentSegment, setCurrentSegment] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const playingRef = useRef(false);
 
   const generateScript = async () => {
     setGenerating(true);
@@ -47,107 +48,160 @@ export default function PodcastPlayer() {
     }
   };
 
-  const speakSegment = (text: string, speaker: string) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-
-      // Use different voices for different speakers
-      if (speaker === 'Expert' && voices.length > 1) {
-        utterance.voice = voices[1];
-        utterance.pitch = 0.9;
-      } else {
-        utterance.voice = voices[0];
-        utterance.pitch = 1.1;
+  const speak = (text: string): Promise<void> => {
+    return new Promise((resolve) => {
+      if (!window.speechSynthesis) {
+        console.warn('⚠️ Speech synthesis not supported');
+        resolve();
+        return;
       }
-      utterance.rate = 0.9;
 
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-
-      window.speechSynthesis.speak(utterance);
-    }
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;  // Slightly slower for clarity
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;  // Ensure full volume
+      
+      utterance.onstart = () => {
+        console.log('🎵 Audio segment started');
+        setIsSpeaking(true);
+      };
+      
+      utterance.onend = () => {
+        console.log('✅ Audio segment completed');
+        setIsSpeaking(false);
+        resolve();
+      };
+      
+      utterance.onerror = (event) => {
+        console.error('❌ Speech synthesis error:', event.error);
+        setIsSpeaking(false);
+        resolve(); // Continue with next segment even if one fails
+      };
+      
+      // Clear any existing speech before starting new
+      window.speechSynthesis.cancel();
+      
+      // Small delay to ensure cancel completed
+      setTimeout(() => {
+        window.speechSynthesis.speak(utterance);
+      }, 100);
+    });
   };
 
   const playAll = async () => {
-    if (!script) return;
+    if (!script || playing) return;
+    
+    // Check if audio is supported
+    if (!window.speechSynthesis) {
+      alert('❌ Audio playback not supported in this browser. Please try Chrome, Firefox, or Safari.');
+      return;
+    }
+    
     setPlaying(true);
-
-    for (let i = 0; i < script.segments.length; i++) {
-      if (!playing && i > 0) break;
-      setCurrentSegment(i);
-
-      const seg = script.segments[i];
-      await new Promise<void>((resolve) => {
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance(seg.text);
-          const voices = window.speechSynthesis.getVoices();
-          if (seg.speaker === 'Expert' && voices.length > 1) {
-            utterance.voice = voices[1];
-            utterance.pitch = 0.9;
-          } else {
-            utterance.voice = voices[0];
-            utterance.pitch = 1.1;
-          }
-          utterance.rate = 0.9;
-          utterance.onend = () => resolve();
-          utterance.onerror = () => resolve();
-          window.speechSynthesis.speak(utterance);
-        } else {
-          setTimeout(resolve, 2000);
+    playingRef.current = true;
+    console.log('🎵 Starting podcast playback with', script.segments.length, 'segments');
+    
+    try {
+      for (let i = 0; i < script.segments.length && playingRef.current; i++) {
+        console.log(`📻 Playing segment ${i + 1}/${script.segments.length}`);
+        setCurrentSegment(i);
+        await speak(script.segments[i].text);
+        
+        // Small pause between segments for better listening experience
+        if (playingRef.current && i < script.segments.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 800));
         }
-      });
+      }
+      
+      if (playingRef.current) {
+        console.log('✅ Podcast playback completed successfully');
+      } else {
+        console.log('🛑 Podcast playback stopped by user');
+      }
+    } catch (error) {
+      console.error('❌ Podcast playback error:', error);
+      alert('Audio playback failed. Please try again.');
     }
 
     setPlaying(false);
+    playingRef.current = false;
+    setCurrentSegment(-1);
   };
 
   const stopPlayback = () => {
+    console.log('🛑 Stopping podcast playback...');
+    playingRef.current = false;
     setPlaying(false);
+    setCurrentSegment(-1);
     setIsSpeaking(false);
-    if ('speechSynthesis' in window) {
+    
+    if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Audio Learning</h2>
-        <span className="text-xs text-muted-foreground bg-secondary px-2 py-1 rounded">Podcast Mode</span>
+        <div>
+          <h2 className="text-3xl font-display font-bold text-white mb-2">Audio Learning</h2>
+          <p className="text-sm leading-relaxed text-[#A1A1AA] font-normal">AI-generated podcast conversations</p>
+        </div>
+        <span className="px-3 py-1.5 text-xs font-mono font-semibold rounded-lg bg-pink-500/20 text-pink-300 border border-pink-500/30">
+          PODCAST MODE
+        </span>
       </div>
 
       {/* Generation Form */}
       {!script && (
-        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <p className="text-muted-foreground">Generate a podcast-style conversation from your study materials. Two AI speakers will discuss the topics in an engaging format.</p>
+        <div className="gc-card p-8 space-y-6">
+          <div className="text-center mb-4">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-pink-500/20 to-orange-500/20 flex items-center justify-center text-4xl">
+              🎙️
+            </div>
+            <p className="text-slate-300 font-body text-base max-w-xl mx-auto leading-relaxed">
+              Generate a podcast-style conversation from your study materials. Two AI speakers will discuss the topics in an engaging format.
+            </p>
+          </div>
 
-          <input
-            type="text"
-            placeholder="Topic (leave empty for auto-detect from documents)"
-            value={topic}
-            onChange={e => setTopic(e.target.value)}
-            className="w-full px-4 py-2 bg-background border border-border rounded-full text-sm"
-          />
+          <div className="space-y-2">
+            <label className="block text-sm font-mono font-semibold text-slate-300">
+              Topic (leave empty for auto-detect from documents)
+            </label>
+            <input
+              type="text"
+              value={topic}
+              onChange={e => setTopic(e.target.value)}
+              placeholder="e.g., Quantum Computing, Machine Learning..."
+              className="w-full px-4 py-3 bg-[rgb(var(--bg-elevated))] border border-white/10 rounded-lg text-white placeholder-slate-500 font-body text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+            />
+          </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground block mb-1">Duration</label>
-              <select value={duration} onChange={e => setDuration(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-full text-sm">
-                <option value="short" className="bg-background text-foreground">Short (2-3 min)</option>
-                <option value="medium" className="bg-background text-foreground">Medium (5 min)</option>
-                <option value="long" className="bg-background text-foreground">Long (10 min)</option>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="block text-sm font-mono font-semibold text-slate-300">Duration</label>
+              <select
+                value={duration}
+                onChange={e => setDuration(e.target.value)}
+                className="w-full px-4 py-3 bg-[rgb(var(--bg-elevated))] border border-white/10 rounded-lg text-white font-body text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+              >
+                <option value="short">Short (2-3 min)</option>
+                <option value="medium">Medium (5 min)</option>
+                <option value="long">Long (10 min)</option>
               </select>
             </div>
-            <div className="flex-1">
-              <label className="text-xs text-muted-foreground block mb-1">Style</label>
-              <select value={style} onChange={e => setStyle(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-full text-sm">
-                <option value="educational" className="bg-background text-foreground">Educational</option>
-                <option value="debate" className="bg-background text-foreground">Debate</option>
-                <option value="interview" className="bg-background text-foreground">Interview</option>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-mono font-semibold text-slate-300">Style</label>
+              <select
+                value={style}
+                onChange={e => setStyle(e.target.value)}
+                className="w-full px-4 py-3 bg-[rgb(var(--bg-elevated))] border border-white/10 rounded-lg text-white font-body text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
+              >
+                <option value="educational">Educational</option>
+                <option value="debate">Debate</option>
+                <option value="casual">Casual Chat</option>
               </select>
             </div>
           </div>
@@ -155,87 +209,106 @@ export default function PodcastPlayer() {
           <button
             onClick={generateScript}
             disabled={generating}
-            className="w-full py-3 btn-pill-primary flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50 transition-colors"
+            className="gc-btn-primary w-full py-4 text-base font-semibold flex items-center justify-center gap-2"
           >
             {generating ? (
               <>
-                <span className="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span>
-                Generating Podcast Script...
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Generating Podcast...
               </>
             ) : (
-              'Generate Podcast'
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3-3z" />
+                </svg>
+                Generate Podcast
+              </>
             )}
           </button>
 
-          {error && <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg p-3">{error}</div>}
+          {error && (
+            <div className="gc-card p-4 border-l-4 border-l-red-500 bg-red-500/10">
+              <p className="text-sm text-red-400 font-body">{error}</p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Script Display + Player */}
+      {/* Player */}
       {script && (
         <>
-          {/* Player Controls */}
-          <div className="bg-card border border-border rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
+          <div className="gc-card p-6">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <div className="font-semibold">{script.title}</div>
-                <div className="text-xs text-muted-foreground">{script.segment_count} segments - {script.duration_estimate} - {script.style}</div>
+                <h3 className="text-xl font-display font-semibold tracking-tight text-white">{script.title}</h3>
+                <p className="text-xs text-slate-400 font-mono mt-1">
+                  {script.speakers.join(' & ')} · {script.duration_estimate} · {script.style}
+                </p>
               </div>
               <div className="flex gap-2">
                 {!playing ? (
-                  <button onClick={playAll} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    &#9654; Play All
+                  <button
+                    onClick={playAll}
+                    className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                    </svg>
+                    Play All
                   </button>
                 ) : (
-                  <button onClick={stopPlayback} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    &#9632; Stop
+                  <button
+                    onClick={stopPlayback}
+                    className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition-all flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clipRule="evenodd" />
+                    </svg>
+                    Stop
                   </button>
                 )}
-                <button onClick={() => { setScript(null); stopPlayback(); }} className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors">
+                <button
+                  onClick={() => { setScript(null); stopPlayback(); }}
+                  className="gc-btn-secondary px-4"
+                >
                   New
                 </button>
               </div>
             </div>
 
-            {/* Progress */}
-            <div className="w-full bg-secondary rounded-full h-1.5">
-              <div className="bg-primary h-1.5 rounded-full transition-all"
-                style={{ width: `${((currentSegment + 1) / script.segments.length) * 100}%` }}></div>
-            </div>
-            <div className="text-xs text-muted-foreground mt-1">Segment {currentSegment + 1} of {script.segments.length}</div>
-          </div>
-
-          {/* Transcript */}
-          <div className="space-y-2 max-h-96 overflow-y-auto">
-            {script.segments.map((seg, idx) => (
+            {/* Progress Bar */}
+            <div className="w-full bg-[rgb(var(--bg-elevated))] rounded-full h-2 mb-6">
               <div
-                key={idx}
-                onClick={() => { setCurrentSegment(idx); speakSegment(seg.text, seg.speaker); }}
-                className={`p-3 rounded-lg cursor-pointer transition-all ${
-                  idx === currentSegment
-                    ? 'bg-primary/20 border border-primary/30 ring-1 ring-primary/20'
-                    : 'bg-card border border-border hover:bg-secondary/50'
-                } ${idx < currentSegment ? 'opacity-60' : ''}`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded ${
-                    seg.speaker === 'Host'
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-purple-500/20 text-purple-400'
-                  }`}>
-                    {seg.speaker}
-                  </span>
-                  {idx === currentSegment && isSpeaking && (
-                    <span className="flex gap-0.5">
-                      <span className="w-1 h-3 bg-primary rounded-full animate-pulse"></span>
-                      <span className="w-1 h-4 bg-primary rounded-full animate-pulse" style={{animationDelay: '0.1s'}}></span>
-                      <span className="w-1 h-2 bg-primary rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></span>
-                    </span>
-                  )}
+                className="bg-gradient-to-r from-cyan-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                style={{ width: `${((currentSegment + 1) / script.segments.length) * 100}%` }}
+              />
+            </div>
+
+            {/* Transcript */}
+            <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              {script.segments.map((seg, idx) => (
+                <div
+                  key={idx}
+                  className={`p-4 rounded-lg border transition-all ${
+                    idx === currentSegment && playing
+                      ? 'bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border-cyan-500/30 scale-[1.02]'
+                      : 'bg-[rgb(var(--bg-elevated))] border-white/5'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-mono font-bold text-cyan-400">{seg.speaker}</span>
+                    {idx === currentSegment && isSpeaking && (
+                      <span className="flex gap-0.5">
+                        <span className="w-1 h-3 bg-cyan-500 rounded-full animate-pulse"></span>
+                        <span className="w-1 h-4 bg-cyan-500 rounded-full animate-pulse" style={{ animationDelay: '0.1s' }}></span>
+                        <span className="w-1 h-2 bg-cyan-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-300 font-body leading-relaxed">{seg.text}</p>
                 </div>
-                <p className="text-sm">{seg.text}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </>
       )}

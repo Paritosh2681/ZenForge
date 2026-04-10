@@ -125,13 +125,36 @@ async def generate_study_plan(days: int = 7):
             """SELECT tm.*, t.name as topic_name
                FROM topic_mastery tm
                JOIN topics t ON tm.topic_id = t.id
-               WHERE tm.next_review IS NOT NULL
-               ORDER BY tm.next_review ASC
+               WHERE tm.next_review IS NOT NULL OR tm.mastery_level < 0.5
+               ORDER BY tm.next_review ASC, tm.mastery_level ASC
                LIMIT 20"""
         )
         review_topics = await cursor.fetchall()
         cols = [d[0] for d in cursor.description]
-
+        
+        # Fallback if no topics in mastery: get random topics
+        if not review_topics:
+            cursor = await conn.execute(
+                """SELECT id as topic_id, name as topic_name, 0.0 as mastery_level
+                   FROM topics LIMIT 5"""
+            )
+            fallback_topics = await cursor.fetchall()
+            cols = ['topic_id', 'topic_name', 'mastery_level']
+            review_topics = fallback_topics
+            
+        # If absolutely nothing is in database, create a default onboarding plan
+        if not review_topics:
+            today = datetime.now()
+            plan_id = str(uuid.uuid4())
+            await conn.execute(
+                "INSERT OR IGNORE INTO study_plans (id, topic_id, title, description, scheduled_date, duration_minutes) VALUES (?, ?, ?, ?, ?, ?)",
+                (plan_id, None, "Welcome to ZenForge Study Planner",
+                 "Start by reading some documents, taking quizzes, and uploading materials to build your learning path.",
+                 today.strftime('%Y-%m-%d'), 15)
+            )
+            await conn.commit()
+            return {"plans_created": 1, "plans": [{"id": plan_id, "topic": "Onboarding", "date": today.strftime('%Y-%m-%d'), "duration": 15}]}
+            
         plans_created = []
         today = datetime.now()
 

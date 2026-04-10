@@ -72,7 +72,7 @@ async def check_and_award_badges():
             from app.services.vector_store import VectorStore
             vs = VectorStore()
             stats['uploads'] = vs.get_document_count() // 5  # rough estimate
-        except:
+        except Exception:
             stats['uploads'] = 0
 
         # Count completed quizzes
@@ -93,7 +93,7 @@ async def check_and_award_badges():
             )
             row = await cursor.fetchone()
             stats['streak_days'] = row[0] if row else 0
-        except:
+        except Exception:
             stats['streak_days'] = 0
 
         # Count topics studied

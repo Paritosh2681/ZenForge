@@ -4,6 +4,7 @@ except ImportError:
     # Fallback for pydantic v1
     from pydantic import BaseSettings
 from pathlib import Path
+import os
 
 class Settings(BaseSettings):
     """Application configuration with local-first architecture"""
@@ -20,11 +21,16 @@ class Settings(BaseSettings):
     CACHE_DIR: Path = BASE_DIR / "data" / "cache"
 
     # Local LLM Configuration (Ollama)
-    OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "mistral:7b"  # Default model
+    # LLM Configuration
+    OLLAMA_BASE_URL: str = "http://host.docker.internal:11434" if os.environ.get("WSL_DISTRO_NAME") else "http://127.0.0.1:11434"
+    OLLAMA_MODEL: str = "llama3.2:latest"  # Default model
 
     # Embedding Model (Local via sentence-transformers)
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
+
+    # Offline-first runtime behavior  
+    OFFLINE_MODE: bool = True  # Allow online downloads when needed
+    LOCAL_MODEL_ONLY: bool = True  # Allow downloading embedding models when needed
 
     # ChromaDB
     CHROMA_COLLECTION_NAME: str = "guru_agent_knowledge"
