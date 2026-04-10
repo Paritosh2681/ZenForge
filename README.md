@@ -1,8 +1,8 @@
-# 🚀 ZenForge - AI Learning Companion
+# 🚀 GuruCortex - AI Learning Companion
 
-> **A 100% Local, Privacy-First AI Learning Companion** — Built for the AMD Slingshot Hackathon
+> **A 100% Local, Privacy-First AI Learning Companion** — Built by Team ZenForge for the AMD Slingshot Hackathon
 
-[![GitHub](https://img.shields.io/badge/GitHub-ZenForge-blue?logo=github)](https://github.com/yourusername/zenforge)
+[![GitHub](https://img.shields.io/badge/GitHub-GuruCortex-blue?logo=github)](https://github.com/Paritosh2681/ZenForge)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green?logo=node.js)](https://nodejs.org/)
@@ -12,9 +12,9 @@
 
 ## 📋 Overview
 
-**ZenForge** is a full-stack, local-first **Retrieval-Augmented Generation (RAG)** application that transforms how you learn from documents. It combines a modern Next.js frontend with a powerful FastAPI backend to deliver an intelligent, privacy-conscious learning experience—all running securely on your local device.
+**GuruCortex** is a full-stack, local-first **Retrieval-Augmented Generation (RAG)** application that transforms how you learn from documents. It combines a modern Next.js frontend with a powerful FastAPI backend to deliver an intelligent, privacy-conscious learning experience—all running securely on your local device.
 
-### Why ZenForge?
+### Why GuruCortex?
 
 - **🔒 Complete Privacy:** 100% local processing, zero cloud APIs, no data telemetry
 - **⚡ Instant Setup:** Single-command deployment with Docker or native scripts
@@ -93,8 +93,8 @@
 
 ```bash
 # Clone and navigate to project
-git clone https://github.com/yourusername/zenforge.git
-cd zenforge
+git clone https://github.com/Paritosh2681/ZenForge.git
+cd ZenForge
 
 # Run complete system startup
 .\start_complete_system.bat
@@ -122,7 +122,9 @@ docker-compose logs -f
 docker-compose down
 ```
 
-### Option 3: Manual Native Setup
+Then open http://localhost:3000 in your browser.
+
+### #Option 3: Manual Native Setup
 
 #### Backend Setup
 ```bash
@@ -163,7 +165,7 @@ Then open http://localhost:3000 in your browser.
 ## 📁 Project Structure
 
 ```
-zenforge/
+gurucortex/
 ├── 📄 README.md                    # This file
 ├── 📄 PROJECT_SUMMARY.md           # Detailed project overview
 ├── 📄 QUICKSTART.md                # Quick reference guide
@@ -341,7 +343,7 @@ User Document
 - **No telemetry** or usage tracking
 - **No API keys** required for core features
 - **All data stays local** in the `./data` directory
-
+GuruCortex
 ### Offline Capability
 ZenForge works completely offline after initial setup:
 1. Documents are processed locally
@@ -363,7 +365,7 @@ ZenForge works completely offline after initial setup:
 
 ---
 
-## 🔌 Offline Mode Setup
+GuruCortexfline Mode Setup
 
 ZenForge includes dedicated offline setup scripts. All components can run without internet:
 
@@ -681,7 +683,7 @@ Describe the feature and why it would be useful
 
 ## 🎉 Conclusion
 
-ZenForge represents a new paradigm in AI-assisted learning—combining the power of large language models with the privacy-first approach that users deserve. Whether you're a student, educator, researcher, or lifelong learner, ZenForge provides the tools to learn smarter, faster, and more safely.
+GuruCortex represents a new paradigm in AI-assisted learning—combining the power of large language models with the privacy-first approach that users deserve. Whether you're a student, educator, researcher, or lifelong learner, GuruCortex provides the tools to learn smarter, faster, and more safely.
 
 **Join us in building the future of privacy-conscious AI learning.**
 
@@ -689,7 +691,7 @@ ZenForge represents a new paradigm in AI-assisted learning—combining the power
 
 <div align="center">
 
-**Made with ❤️ by Team ZenForge**
+**GuruCortex | Built with ❤️ by Team ZenForge**
 
 ⭐ If you find this project useful, please consider giving it a star! ⭐
 
