@@ -673,14 +673,6 @@ Describe the feature and why it would be useful
 
 ---
 
-## 📞 Social Links
-
-- **GitHub:** [zenforge-ai](https://github.com/yourusername/zenforge)
-- **Email:** contact@zenforge.ai
-- **Discord:** [Community Server](https://discord.gg/zenforge)
-
----
-
 ## 🎉 Conclusion
 
 GuruCortex represents a new paradigm in AI-assisted learning—combining the power of large language models with the privacy-first approach that users deserve. Whether you're a student, educator, researcher, or lifelong learner, GuruCortex provides the tools to learn smarter, faster, and more safely.
