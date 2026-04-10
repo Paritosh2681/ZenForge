@@ -8,6 +8,8 @@ from typing import Dict, Optional
 from pathlib import Path
 import tempfile
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -39,8 +41,29 @@ class VoiceInputService:
             self.supported_languages = ["en"]
             return
 
-        print(f"Loading Whisper model: {model_size}...")
-        self.model = whisper.load_model(model_size)
+        cache_dir = settings.CACHE_DIR / "whisper"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        expected_model_path = cache_dir / f"{model_size}.pt"
+
+        if settings.LOCAL_MODEL_ONLY and not expected_model_path.exists():
+            logger.warning(
+                "Whisper model %s not found at %s. Voice transcription disabled in local-only mode.",
+                model_size,
+                expected_model_path,
+            )
+            self.model = None
+            self.supported_languages = ["en"]
+            return
+
+        try:
+            print(f"Loading Whisper model: {model_size}...")
+            self.model = whisper.load_model(model_size, download_root=str(cache_dir))
+        except Exception as model_error:
+            logger.warning("Failed to load Whisper model, voice transcription disabled: %s", model_error)
+            self.model = None
+            self.supported_languages = ["en"]
+            return
+
         self.supported_languages = [
             "en",  # English
             "hi",  # Hindi
@@ -65,15 +88,37 @@ class VoiceInputService:
     ) -> Dict:
         """
         Transcribe audio to text
-
-        Args:
-            audio_data: Audio bytes (WAV format)
-            language: Language code (None for auto-detect)
-            task: 'transcribe' or 'translate' (to English)
-
-        Returns:
-            Dict with transcription and metadata
         """
+        if self.model is None:
+            logger.info("Using standard SpeechRecognition fallback as Whisper config failed.")
+            try:
+                import speech_recognition as sr
+                import io
+                
+                recognizer = sr.Recognizer()
+                # Need to convert audio_data to AudioFile
+                with sr.AudioFile(io.BytesIO(audio_data)) as source:
+                    audio_sr = recognizer.record(source)
+                
+                # Use Google Web Speech API for fallback transcription
+                text = recognizer.recognize_google(audio_sr, language=language if language else "en-US")
+                
+                return {
+                    "text": text,
+                    "language": language if language else "en",
+                    "language_name": self._get_language_name(language) if language else "English",
+                    "confidence": 0.9,
+                    "task": task,
+                    "segments": []
+                }
+            except Exception as e:
+                logger.error(f"SpeechRecognition fallback failed: {e}")
+                return {
+                    "error": f"Voice transcription failed. Whisper disabled & Fallback error: {e}",
+                    "text": "",
+                    "language": "unknown",
+                }
+
         # Save audio to temp file
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_audio:
             temp_audio.write(audio_data)

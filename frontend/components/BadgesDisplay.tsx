@@ -103,46 +103,53 @@ export default function BadgesDisplay() {
 
       {/* Stats Overview */}
       {stats && (
-        <div className="bg-gradient-to-r from-primary/20 to-primary/5 border border-primary/20 rounded-xl p-6">
+        <div className="gc-card p-6 bg-gradient-to-br from-[#22C55E]/10 to-transparent border-[#22C55E]/30">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="text-3xl font-bold">Level {stats.level}</div>
-              <div className="text-sm text-muted-foreground">Keep learning to level up!</div>
+              <div className="text-3xl font-bold text-white">Level {stats.level}</div>
+              <div className="text-sm text-slate-400 font-mono">Keep learning to level up!</div>
             </div>
-            <button onClick={checkForNewBadges} disabled={checking} className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50">
-              {checking ? 'Checking...' : 'Check Badges'}
+            <button onClick={checkForNewBadges} disabled={checking} className="gc-btn-primary text-sm">
+              {checking ? (
+                <span className="flex items-center gap-2">
+                  <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Checking...
+                </span>
+              ) : (
+                'Check Badges'
+              )}
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             <div className="text-center">
-              <div className="text-xl font-bold">{stats.badges_earned}/{stats.total_badges}</div>
-              <div className="text-xs text-muted-foreground">Badges</div>
+              <div className="text-xl font-bold text-white">{stats.badges_earned}/{stats.total_badges}</div>
+              <div className="text-xs font-semibold text-[#A1A1AA]">Badges</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold">{stats.streak_days}</div>
-              <div className="text-xs text-muted-foreground">Day Streak</div>
+              <div className="text-xl font-bold text-white">{stats.streak_days}</div>
+              <div className="text-xs font-semibold text-[#A1A1AA]">Day Streak</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold">{stats.quizzes_completed}</div>
-              <div className="text-xs text-muted-foreground">Quizzes</div>
+              <div className="text-xl font-bold text-white">{stats.quizzes_completed}</div>
+              <div className="text-xs font-semibold text-[#A1A1AA]">Quizzes</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold">{stats.topics_mastered}</div>
-              <div className="text-xs text-muted-foreground">Mastered</div>
+              <div className="text-xl font-bold text-white">{stats.topics_mastered}</div>
+              <div className="text-xs font-semibold text-[#A1A1AA]">Mastered</div>
             </div>
             <div className="text-center">
-              <div className="text-xl font-bold">{stats.total_study_minutes}m</div>
-              <div className="text-xs text-muted-foreground">Study Time</div>
+              <div className="text-xl font-bold text-white">{stats.total_study_minutes}m</div>
+              <div className="text-xs font-semibold text-[#A1A1AA]">Study Time</div>
             </div>
           </div>
           {/* Progress bar */}
           <div className="mt-4">
-            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+            <div className="flex justify-between text-xs text-slate-400 font-mono mb-1">
               <span>Badge Progress</span>
               <span>{progressPct}%</span>
             </div>
-            <div className="w-full bg-secondary rounded-full h-2">
-              <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${progressPct}%` }}></div>
+            <div className="w-full bg-slate-700 rounded-full h-2">
+              <div className="bg-gradient-to-r from-[#22C55E] to-emerald-400 h-2 rounded-full transition-all" style={{ width: `${progressPct}%` }}></div>
             </div>
           </div>
         </div>
@@ -152,8 +159,10 @@ export default function BadgesDisplay() {
       <div className="flex gap-2 flex-wrap">
         {categories.map(cat => (
           <button key={cat} onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1 text-xs rounded-full capitalize transition-colors ${
-              selectedCategory === cat ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'
+            className={`px-3 py-1.5 text-xs rounded-lg capitalize transition-all font-mono ${
+              selectedCategory === cat 
+                ? 'bg-[#22C55E] text-[#0D0D0D] font-semibold shadow-[0_0_10px_rgba(34,197,94,0.3)]' 
+                : 'bg-slate-800/50 text-slate-400 hover:text-white hover:border-[#22C55E]/30 border border-white/10'
             }`}>
             {cat}
           </button>
@@ -161,25 +170,25 @@ export default function BadgesDisplay() {
       </div>
 
       {/* Badges Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         {filteredBadges.map((badge) => (
           <div key={badge.name}
-            className={`border rounded-xl p-4 text-center transition-all ${
+            className={`gc-card p-4 text-center transition-all duration-300 ${
               badge.earned
-                ? 'bg-card border-primary/30 hover:border-primary/50 hover:shadow-lg'
-                : 'bg-card/50 border-border opacity-50 grayscale'
+                ? 'border-[#22C55E]/30 bg-gradient-to-br from-[#22C55E]/10 to-transparent hover:border-[#22C55E]/50 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)]'
+                : 'border-white/10 bg-slate-800/50 opacity-50 grayscale'
             } ${newBadges.includes(badge.name) ? 'ring-2 ring-yellow-400 animate-pulse' : ''}`}
           >
             <div className="text-3xl mb-2">{ICON_MAP[badge.icon] || badge.icon}</div>
-            <div className="font-semibold text-sm">{badge.name}</div>
-            <div className="text-xs text-muted-foreground mt-1">{badge.description}</div>
+            <div className="font-semibold text-sm text-white">{badge.name}</div>
+            <div className="text-xs text-slate-400 font-mono mt-1">{badge.description}</div>
             {badge.earned && badge.earned_at && (
-              <div className="text-xs text-primary mt-2">
+              <div className="text-xs text-[#22C55E] mt-2 font-mono">
                 Earned {new Date(badge.earned_at).toLocaleDateString()}
               </div>
             )}
             {!badge.earned && (
-              <div className="text-xs text-muted-foreground mt-2 italic">Locked</div>
+              <div className="text-xs text-slate-500 mt-2 italic font-mono">Locked</div>
             )}
           </div>
         ))}

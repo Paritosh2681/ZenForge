@@ -3,7 +3,7 @@ Analytics API Router - Endpoints for learning insights and topic mastery
 Phase 4: Week 2
 """
 import logging
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Query
 
 from app.services.topic_extractor import TopicExtractor
@@ -72,7 +72,7 @@ async def get_all_topics(
 
 @router.post("/topics/extract")
 async def extract_topics(
-    document_ids: Optional[list[str]] = None,
+    document_ids: Optional[List[str]] = None,
     max_topics: int = Query(default=10, ge=1, le=50)
 ) -> dict:
     """

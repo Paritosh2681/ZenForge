@@ -2,7 +2,7 @@
 Context Window Manager: Handles token counting and context window management.
 """
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import tiktoken
 
 from app.config import settings
@@ -119,7 +119,7 @@ class ContextWindowManager:
         self,
         messages: List[Message],
         available_tokens: int
-    ) -> tuple[List[Message], int]:
+    ) -> Tuple[List[Message], int]:
         """
         Select messages using sliding window strategy
 

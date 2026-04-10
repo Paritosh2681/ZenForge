@@ -1,7 +1,7 @@
 import uuid
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Tuple
 
 from app.config import settings
 
@@ -46,11 +46,16 @@ class DocumentProcessor:
         else:
             self.text_splitter = None
 
-    async def process_document(self, file_path: Path, filename: str) -> Dict[str, Any]:
+    async def process_document(
+        self,
+        file_path: Path,
+        filename: str,
+        document_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Process uploaded document and return chunks with metadata"""
 
         file_extension = file_path.suffix.lower()
-        document_id = str(uuid.uuid4())
+        document_id = document_id or str(uuid.uuid4())
 
         # Extract text based on file type
         if file_extension == ".pdf":
@@ -99,7 +104,7 @@ class DocumentProcessor:
             "metadata": metadata
         }
 
-    def _extract_pdf(self, file_path: Path) -> tuple[str, Dict[str, Any]]:
+    def _extract_pdf(self, file_path: Path) -> Tuple[str, Dict[str, Any]]:
         """Extract text from PDF"""
         text = ""
         page_count = 0
@@ -119,7 +124,7 @@ class DocumentProcessor:
 
         return text, metadata
 
-    def _extract_pptx(self, file_path: Path) -> tuple[str, Dict[str, Any]]:
+    def _extract_pptx(self, file_path: Path) -> Tuple[str, Dict[str, Any]]:
         """Extract text from PowerPoint"""
         prs = Presentation(file_path)
         text = ""
@@ -141,7 +146,7 @@ class DocumentProcessor:
 
         return text, metadata
 
-    def _extract_docx(self, file_path: Path) -> tuple[str, Dict[str, Any]]:
+    def _extract_docx(self, file_path: Path) -> Tuple[str, Dict[str, Any]]:
         """Extract text from Word document"""
         doc = DocxDocument(file_path)
         text = "\n\n".join([para.text for para in doc.paragraphs if para.text.strip()])
@@ -153,7 +158,7 @@ class DocumentProcessor:
 
         return text, metadata
 
-    def _extract_txt(self, file_path: Path) -> tuple[str, Dict[str, Any]]:
+    def _extract_txt(self, file_path: Path) -> Tuple[str, Dict[str, Any]]:
         """Extract text from plain text file"""
         with open(file_path, "r", encoding="utf-8", errors="replace") as f:
             text = f.read()

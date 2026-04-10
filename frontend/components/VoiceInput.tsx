@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 interface VoiceInputProps {
   onTranscription: (text: string, language: string) => void;
@@ -10,84 +12,75 @@ interface VoiceInputProps {
 export default function VoiceInput({ onTranscription, onError }: VoiceInputProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const [browserSupport, setBrowserSupport] = useState<boolean>(true);
+  const recognitionRef = useRef<any>(null);
+
+  // Initialize SpeechRecognition in useEffect to avoid state updates during render
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !recognitionRef.current) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          setIsRecording(true);
+        };
+
+        recognition.onresult = (event: any) => {
+          if (event.results && event.results[0] && event.results[0][0]) {
+            const transcript = event.results[0][0].transcript;
+            onTranscription(transcript, 'en');
+          }
+          setIsRecording(false);
+        };
+
+        recognition.onerror = () => {
+          setIsRecording(false);
+          if (onError) onError('Voice recognition error. Please try speaking again.');
+        };
+
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+
+        recognitionRef.current = recognition;
+      } else {
+        setBrowserSupport(false);
+      }
+    }
+  }, [onTranscription, onError]);
 
   const startRecording = async () => {
+    if (!browserSupport && onError) {
+      onError('Browser does not support local voice recognition. WebKit needed.');
+      return;
+    }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        await transcribeAudio(audioBlob);
-
-        // Stop all tracks
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      setIsRecording(true);
-
-    } catch (err) {
-      if (onError) {
-        onError('Microphone access denied. Please enable microphone permissions.');
-      }
+      recognitionRef.current?.start();
+    } catch (e) {
+      if (onError) onError('Failed to start voice input.');
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      setIsProcessing(true);
-    }
-  };
-
-  const transcribeAudio = async (audioBlob: Blob) => {
-    try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'recording.webm');
-
-      const response = await fetch('http://localhost:8000/multimodal/transcribe-voice', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        if (onError) onError(data.error);
-      } else {
-        onTranscription(data.text, data.language);
-      }
-
-    } catch (err) {
-      if (onError) onError('Transcription failed. Please try again.');
-    } finally {
-      setIsProcessing(false);
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
     }
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-4">
       <button
         onClick={isRecording ? stopRecording : startRecording}
         disabled={isProcessing}
-        className={`p-3 rounded-full transition-all flex items-center justify-center ${
+        className={`flex items-center gap-3 px-6 py-3 rounded-lg transition-all font-medium ${
           isRecording
-            ? 'bg-red-500 hover:bg-red-600 animate-pulse text-white'
-            : 'btn-pill-primary'
-        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+            ? 'bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+            : 'bg-[#22C55E] hover:bg-[#16A34A] shadow-[0_0_15px_rgba(34,197,94,0.3)]'
+        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''} text-[#0D0D0D] font-semibold`}
         title={isRecording ? 'Stop recording' : 'Start voice input'}
       >
         {isProcessing ? (
@@ -103,18 +96,24 @@ export default function VoiceInput({ onTranscription, onError }: VoiceInputProps
             <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
           </svg>
         )}
+        
+        <span>
+          {isProcessing ? 'Processing...' : isRecording ? 'Stop Recording' : 'Start Voice Input'}
+        </span>
       </button>
 
       {isRecording && (
-        <span className="text-sm text-red-600 animate-pulse">
+        <div className="flex items-center gap-2 text-[#22C55E] font-mono text-sm">
+          <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
           Recording...
-        </span>
+        </div>
       )}
 
       {isProcessing && (
-        <span className="text-sm text-gray-600">
+        <div className="flex items-center gap-2 text-amber-400 font-mono text-sm">
+          <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
           Transcribing...
-        </span>
+        </div>
       )}
     </div>
   );

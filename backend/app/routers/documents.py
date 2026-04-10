@@ -3,15 +3,21 @@ from pathlib import Path
 import shutil
 import uuid
 
-from app.models.schemas import DocumentUploadResponse
+from app.models.schemas import (
+    DocumentUploadResponse,
+    DocumentListItem,
+    DocumentListResponse,
+)
 from app.services.document_processor import DocumentProcessor
 from app.services.rag_engine import RAGEngine
+from app.services.document_registry import DocumentRegistry
 from app.config import settings
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 document_processor = DocumentProcessor()
 rag_engine = RAGEngine()
+document_registry = DocumentRegistry()
 
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(file: UploadFile = File(...)):
@@ -52,11 +58,23 @@ async def upload_document(file: UploadFile = File(...)):
         # Process document (extract text and chunk)
         processed_data = await document_processor.process_document(
             temp_file_path,
-            file.filename
+            file.filename,
+            document_id=file_id,
         )
 
         # Index chunks into vector store
         chunks_indexed = await rag_engine.index_document(processed_data["chunks"])
+
+        # Save document metadata for listing and selection in UI
+        metadata = processed_data.get("metadata", {})
+        await document_registry.add_document(
+            document_id=processed_data["document_id"],
+            filename=file.filename,
+            file_type=metadata.get("file_type", file_extension.lstrip(".")),
+            file_size=file_size,
+            chunks_created=chunks_indexed,
+            total_pages=metadata.get("total_pages"),
+        )
 
         return DocumentUploadResponse(
             document_id=processed_data["document_id"],
@@ -82,3 +100,43 @@ async def get_document_count():
     """Get total number of indexed chunks"""
     count = rag_engine.vector_store.get_document_count()
     return {"total_chunks": count}
+
+
+@router.get("", response_model=DocumentListResponse)
+async def list_documents():
+    """Get uploaded documents for document-scoped chat selection."""
+    documents = await document_registry.list_documents()
+    return DocumentListResponse(
+        documents=[DocumentListItem(**doc) for doc in documents],
+        total=len(documents),
+    )
+
+@router.delete("/{document_id}")
+async def delete_document(document_id: str):
+    """Delete a document and its associated chunks"""
+    try:
+        # Remove from registry
+        success = await document_registry.delete_document(document_id)
+        
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Document with ID {document_id} not found"
+            )
+        
+        # Remove from RAG engine if it exists
+        try:
+            await rag_engine.remove_document(document_id)
+        except Exception as e:
+            # Log but don't fail if RAG removal fails
+            print(f"Warning: Failed to remove document from RAG engine: {e}")
+        
+        return {"message": f"Document deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete document: {str(e)}"
+        )

@@ -5,7 +5,7 @@ Phase 4: Week 1
 import json
 import logging
 import uuid
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Tuple
 from datetime import datetime
 
 from app.services.database import Database
@@ -165,7 +165,7 @@ class QuizManager:
         self,
         limit: int = 50,
         offset: int = 0
-    ) -> tuple[List[Quiz], int]:
+    ) -> Tuple[List[Quiz], int]:
         """List all quizzes with pagination"""
 
         conn = await self.db.connect()
@@ -206,7 +206,23 @@ class QuizManager:
         conn = await self.db.connect()
 
         try:
+            # Delete dependent records due to lack of ON DELETE CASCADE on some tables
+            # Find all sessions to delete their responses
+            cursor = await conn.execute("SELECT id FROM quiz_sessions WHERE quiz_id = ?", (quiz_id,))
+            sessions = await cursor.fetchall()
+            for session in sessions:
+                session_id = session[0]
+                await conn.execute("DELETE FROM quiz_responses WHERE session_id = ?", (session_id,))
+            
+            # Delete sessions
+            await conn.execute("DELETE FROM quiz_sessions WHERE quiz_id = ?", (quiz_id,))
+            
+            # Delete questions
+            await conn.execute("DELETE FROM questions WHERE quiz_id = ?", (quiz_id,))
+            
+            # Delete the quiz
             await conn.execute("DELETE FROM quizzes WHERE id = ?", (quiz_id,))
+            
             await conn.commit()
             logger.info(f"Deleted quiz {quiz_id}")
             return True

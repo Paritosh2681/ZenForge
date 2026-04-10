@@ -44,6 +44,17 @@ CREATE TABLE IF NOT EXISTS conversation_documents (
     FOREIGN KEY (conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );
 
+-- Uploaded Documents
+CREATE TABLE IF NOT EXISTS documents (
+    id TEXT PRIMARY KEY,
+    filename TEXT NOT NULL,
+    file_type TEXT,
+    file_size INTEGER,
+    chunks_created INTEGER,
+    total_pages INTEGER,
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Context Summaries (for long conversations)
 CREATE TABLE IF NOT EXISTS context_summaries (
     id TEXT PRIMARY KEY,
@@ -176,6 +187,7 @@ CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id
 CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
 CREATE INDEX IF NOT EXISTS idx_conversations_updated ON conversations(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_summaries_conversation ON context_summaries(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_documents_upload_date ON documents(upload_date DESC);
 CREATE INDEX IF NOT EXISTS idx_questions_quiz ON questions(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_sessions_quiz ON quiz_sessions(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_quiz_responses_session ON quiz_responses(session_id);

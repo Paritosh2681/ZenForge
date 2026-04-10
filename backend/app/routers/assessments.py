@@ -56,7 +56,11 @@ async def generate_quiz(request: QuizCreate) -> Quiz:
                 detail=f"Difficulty must be one of: {settings.QUIZ_DIFFICULTY_LEVELS}"
             )
 
-        logger.info(f"Generating quiz: {request.num_questions} questions, difficulty={request.difficulty}")
+        logger.info(f"🔍 Quiz Generation Request:")
+        logger.info(f"  Document IDs: {request.document_ids}")
+        logger.info(f"  Num Questions: {request.num_questions}")
+        logger.info(f"  Difficulty: {request.difficulty}")
+        logger.info(f"  Question Types: {request.question_types}")
 
         # Generate questions using LLM
         questions = await assessment_generator.generate_quiz_questions(
@@ -71,6 +75,8 @@ async def generate_quiz(request: QuizCreate) -> Quiz:
                 status_code=500,
                 detail="Failed to generate quiz questions. Please ensure documents are uploaded."
             )
+
+        logger.info(f"✅ Generated {len(questions)} questions successfully")
 
         # Create quiz
         title = request.title or f"Quiz - {request.difficulty.capitalize()} ({len(questions)} questions)"

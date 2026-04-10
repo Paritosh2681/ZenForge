@@ -29,7 +29,7 @@ import type {
   MasteryUpdate,
 } from '@/types/analytics';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -41,6 +41,7 @@ const apiClient = axios.create({
 export interface ChatRequest {
   query: string;
   conversation_id?: string;
+  document_ids?: string[];
   include_sources?: boolean;
   generate_diagram?: boolean;
 }
@@ -67,6 +68,15 @@ export interface DocumentUploadResponse {
   chunks_created: number;
   status: string;
   message: string;
+}
+
+export interface DocumentListItem {
+  document_id: string;
+  filename: string;
+  file_type: string;
+  file_size: number;
+  chunks_created: number;
+  upload_date: string;
 }
 
 export interface HealthCheck {
@@ -108,6 +118,11 @@ export const api = {
 
   async getDocumentCount(): Promise<{ total_chunks: number }> {
     const response = await apiClient.get('/documents/count');
+    return response.data;
+  },
+
+  async listDocuments(): Promise<{ documents: DocumentListItem[]; total: number }> {
+    const response = await apiClient.get('/documents');
     return response.data;
   },
 
@@ -417,11 +432,30 @@ export const api = {
     return response.data;
   },
 
+  async protegeEvaluate(sessionTopic: string, conversationHistory: { role: string; content: string }[]): Promise<{
+    scores: Record<string, number>;
+    overall_score: number;
+    max_score: number;
+    percentage: number;
+    feedback: string;
+    strengths: string;
+    improvements: string;
+    grade: string;
+  }> {
+    const response = await apiClient.post('/protege/evaluate', {
+      session_topic: sessionTopic,
+      conversation_history: conversationHistory
+    });
+    return response.data;
+  },
+
   async protegeRespond(sessionTopic: string, userExplanation: string, history: { role: string; content: string }[]): Promise<{
-    ai_message: string; topic: string;
+    ai_message: string;
   }> {
     const response = await apiClient.post('/protege/respond', {
-      session_topic: sessionTopic, user_explanation: userExplanation, conversation_history: history
+      session_topic: sessionTopic,
+      user_explanation: userExplanation,
+      conversation_history: history
     });
     return response.data;
   },
@@ -442,6 +476,18 @@ export const api = {
       { text, language: language || 'en' },
       { responseType: 'blob' }
     );
+    return response.data;
+  },
+
+  // Badges system
+  async checkBadgeProgress(): Promise<any> {
+    const response = await apiClient.get('/badges/check-progress');
+    return response.data;
+  },
+
+  // Document management
+  async deleteDocument(documentId: string): Promise<{ message: string }> {
+    const response = await apiClient.delete(`/documents/${documentId}`);
     return response.data;
   },
 };

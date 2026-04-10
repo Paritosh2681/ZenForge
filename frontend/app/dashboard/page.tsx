@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { MessageSquare, FileText, Code, CheckSquare, Presentation, Headphones, BarChart, Trophy, Calendar, Eye, Moon, Sun, ArrowRight, LogOut, Settings } from 'lucide-react';
+
 import ChatInterface from '@/components/ChatInterface';
 import DocumentUploader from '@/components/DocumentUploader';
 import AttentionMonitor from '@/components/AttentionMonitor';
@@ -13,301 +15,182 @@ import BadgesDisplay from '@/components/BadgesDisplay';
 import PodcastPlayer from '@/components/PodcastPlayer';
 import ProtegeMode from '@/components/ProtegeMode';
 import AccessibilityToggle from '@/components/AccessibilityToggle';
-import GlobalFocusTracker from '@/components/GlobalFocusTracker';
-import { 
-  MessageSquare, FileText, Code, 
-  ClipboardList, GraduationCap, Headphones, 
-  BarChart2, Award, CalendarDays 
-} from 'lucide-react';
+import EyeDetectionOverlay from '@/components/EyeDetectionOverlay';
+
 type Tab = 'chat' | 'documents' | 'assessments' | 'analytics' | 'attention' | 'code' | 'planner' | 'badges' | 'podcast' | 'protege';
 
-const tabGroups = [
-  {
-    label: 'Core',
-    tabs: [
-      { id: 'chat' as Tab, label: 'Chat', icon: <MessageSquare size={15} strokeWidth={2.5} /> },
-      { id: 'documents' as Tab, label: 'Docs', icon: <FileText size={15} strokeWidth={2.5} /> },
-      { id: 'code' as Tab, label: 'Code', icon: <Code size={15} strokeWidth={2.5} /> },
-    ],
-  },
-  {
-    label: 'Learn',
-    tabs: [
-      { id: 'assessments' as Tab, label: 'Quiz', icon: <ClipboardList size={15} strokeWidth={2.5} /> },
-      { id: 'protege' as Tab, label: 'Teach', icon: <GraduationCap size={15} strokeWidth={2.5} /> },
-      { id: 'podcast' as Tab, label: 'Audio', icon: <Headphones size={15} strokeWidth={2.5} /> },
-    ],
-  },
-  {
-    label: 'Track',
-    tabs: [
-      { id: 'analytics' as Tab, label: 'Stats', icon: <BarChart2 size={15} strokeWidth={2.5} /> },
-      { id: 'badges' as Tab, label: 'Badges', icon: <Award size={15} strokeWidth={2.5} /> },
-      { id: 'planner' as Tab, label: 'Plan', icon: <CalendarDays size={15} strokeWidth={2.5} /> },
-    ],
-  },
+const tabs: { id: Tab; label: string; icon: React.ReactNode; group: string }[] = [
+  { id: 'chat', label: 'Chat', icon: <MessageSquare size={16} />, group: 'core' },
+  { id: 'documents', label: 'Docs', icon: <FileText size={16} />, group: 'core' },
+  { id: 'code', label: 'Code', icon: <Code size={16} />, group: 'core' },
+  { id: 'assessments', label: 'Quiz', icon: <CheckSquare size={16} />, group: 'learn' },
+  { id: 'protege', label: 'Teach', icon: <Presentation size={16} />, group: 'learn' },
+  { id: 'podcast', label: 'Audio', icon: <Headphones size={16} />, group: 'learn' },
+  { id: 'analytics', label: 'Stats', icon: <BarChart size={16} />, group: 'track' },
+  { id: 'badges', label: 'Badges', icon: <Trophy size={16} />, group: 'track' },
+  { id: 'planner', label: 'Plan', icon: <Calendar size={16} />, group: 'track' },
 ];
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('chat');
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
+  const [selectedDocumentNames, setSelectedDocumentNames] = useState<string[]>([]);
+
+  const handleSelectedDocumentsChange = (documentIds: string[], documentNames: string[]) => {
+    setSelectedDocumentIds(documentIds);
+    setSelectedDocumentNames(documentNames);
+  };
+
+  const handleOpenChatForDocuments = (documentIds: string[], documentNames?: string[]) => {
+    setSelectedDocumentIds(documentIds);
+    if (documentNames) {
+      setSelectedDocumentNames(documentNames);
+    }
+    setActiveTab('chat');
+  };
+
+  const handleClearDocumentScope = () => {
+    setSelectedDocumentIds([]);
+    setSelectedDocumentNames([]);
+  };
 
   return (
-    <>
-      <GlobalFocusTracker />
-      <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        fontFamily: "var(--font-outfit), system-ui, sans-serif",
-      }}
-    >
-      {/* Top Header */}
-      <header
-        className="glass"
-        style={{
-          position: 'relative',
-          zIndex: 100,
-          borderBottom: '1px solid rgba(255,255,255,0.055)',
-          padding: '0 1.25rem',
-          height: '52px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexShrink: 0,
-        }}
-      >
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <a
-            href="/"
-            style={{
-              fontWeight: 700,
-              fontSize: '0.95rem',
-              letterSpacing: '-0.02em',
-              color: 'hsl(220 15% 90%)',
-              textDecoration: 'none',
-            }}
-          >
-            GuruCortex
-          </a>
-          <span
-            style={{
-              fontSize: '0.68rem',
-              color: 'hsl(220 10% 42%)',
-              fontFamily: "'JetBrains Mono', monospace",
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              borderLeft: '1px solid rgba(255,255,255,0.08)',
-              paddingLeft: '0.6rem',
-              marginLeft: '0.2rem',
-            }}
-          >
-            Dashboard
-          </span>
+    <div className="h-screen flex flex-col bg-[rgb(var(--bg-base))]">
+      {/* Top Navigation */}
+      <header className="border-b border-white/10 bg-[#0D0D0D] backdrop-blur-xl px-4 py-3 flex items-center justify-between shrink-0 shadow-sm relative z-50">
+        <div className="flex items-center gap-4 shrink-0">
+            <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <span className="font-extrabold text-xl tracking-tight text-white hidden sm:block">GuruCortex</span>
+            </a>
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#22C55E] bg-[#22C55E]/10 border border-[#22C55E]/20 px-2 py-0.5 rounded-full hidden md:inline-flex items-center gap-1.5"><div className="w-1.5 h-1.5 bg-[#22C55E] rounded-full animate-pulse"></div>STUDIO</span>
         </div>
-
-        {/* Tab Navigation */}
-        <nav
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0',
-            overflowX: 'auto',
-          }}
-        >
-          {tabGroups.map((group, gi) => (
-            <div key={group.label} style={{ display: 'flex', alignItems: 'center' }}>
-              {gi > 0 && (
-                <div
-                  style={{
-                    width: 1,
-                    height: 18,
-                    background: 'rgba(255,255,255,0.08)',
-                    margin: '0 0.4rem',
-                  }}
-                />
-              )}
-              {group.tabs.map((tab) => (
+        <nav className="flex items-center gap-1 overflow-x-auto mx-4 scrollbar-hide">
+          {tabs.map((tab, i) => {
+            const prevGroup = i > 0 ? tabs[i - 1].group : tab.group;
+            return (
+              <div key={tab.id} className="flex items-center">
+                {tab.group !== prevGroup && i > 0 && (
+                  <div className="w-px h-4 bg-white/10 mx-1.5 shrink-0" />
+                )}
                 <button
-                  key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="rounded-full"
-                  style={{
-                    padding: '0.35rem 0.85rem',
-                    fontSize: '0.78rem',
-                    fontWeight: activeTab === tab.id ? 600 : 400,
-                    fontFamily: "var(--font-outfit), sans-serif",
-                    cursor: 'pointer',
-                    outline: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.35rem',
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.15s ease',
-                    background: activeTab === tab.id
-                      ? 'rgba(80,120,255,0.14)'
-                      : 'transparent',
-                    color: activeTab === tab.id
-                      ? 'hsl(220 80% 75%)'
-                      : 'hsl(220 10% 48%)',
-                    border: activeTab === tab.id
-                      ? '1px solid rgba(80,120,255,0.28)'
-                      : '1px solid transparent',
-                  }}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-2 shrink-0 whitespace-nowrap ${
+                    activeTab === tab.id 
+                      ? 'bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] border border-white/20' 
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                  }`}
+                  title={tab.label}
                 >
-                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: activeTab === tab.id ? 1 : 0.7 }}>{tab.icon}</span>
-                  <span className="hidden lg:inline">{tab.label}</span>
+                  <span className={`${activeTab === tab.id ? 'text-[#22C55E] drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-slate-500'}`}>
+                    {tab.icon}
+                  </span>
+                  <span className="hidden lg:inline sm:block">{tab.label}</span>
                 </button>
-              ))}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </nav>
 
-        {/* Right actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="flex items-center gap-3 shrink-0">
           <AccessibilityToggle />
+          <button className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
+            <Settings size={16} />
+          </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main style={{ flex: 1, overflow: 'hidden' }}>
-        {activeTab === 'chat' && <ChatInterface />}
+      <main className="flex-1 overflow-hidden">
+        {activeTab === 'chat' && (
+          <ChatInterface
+            selectedDocumentIds={selectedDocumentIds}
+            selectedDocumentNames={selectedDocumentNames}
+            onClearDocumentScope={handleClearDocumentScope}
+          />
+        )}
 
         {activeTab === 'documents' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '720px', margin: '0 auto' }}>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <span
-                  style={{
-                    fontSize: '0.68rem',
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    color: 'hsl(220 10% 40%)',
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  Knowledge Base
-                </span>
-                <h2
-                  style={{
-                    fontSize: '1.4rem',
-                    fontWeight: 700,
-                    color: 'hsl(220 15% 90%)',
-                    letterSpacing: '-0.02em',
-                    marginTop: '0.3rem',
-                  }}
-                >
-                  Document Manager
-                </h2>
-                <p style={{ color: 'hsl(220 10% 50%)', fontSize: '0.85rem', marginTop: '0.3rem' }}>
-                  Upload study materials (PDF, DOCX, PPTX, TXT) to build your knowledge base.
-                </p>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div>
+                <h2 className="text-3xl font-display font-semibold tracking-tight text-white mb-2">Document Manager</h2>
+                <p className="text-sm leading-relaxed text-[#A1A1AA] font-normal">Upload study materials (PDF, DOCX, PPTX, TXT) to build your knowledge base.</p>
               </div>
-              <DocumentUploader />
+              <DocumentUploader
+                selectedDocumentIds={selectedDocumentIds}
+                onSelectionChange={handleSelectedDocumentsChange}
+                onOpenChatForDocuments={handleOpenChatForDocuments}
+              />
             </div>
           </div>
         )}
 
         {activeTab === 'code' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-4xl mx-auto">
               <CodeSandbox />
             </div>
           </div>
         )}
 
         {activeTab === 'assessments' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-              <AssessmentHub />
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-4xl mx-auto">
+              <AssessmentHub
+                selectedDocumentIds={selectedDocumentIds}
+                selectedDocumentNames={selectedDocumentNames}
+              />
             </div>
           </div>
         )}
 
         {activeTab === 'protege' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-3xl mx-auto">
               <ProtegeMode />
             </div>
           </div>
         )}
 
         {activeTab === 'podcast' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-3xl mx-auto">
               <PodcastPlayer />
             </div>
           </div>
         )}
 
         {activeTab === 'analytics' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-6xl mx-auto">
               <LearningDashboard />
             </div>
           </div>
         )}
 
         {activeTab === 'badges' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-4xl mx-auto">
               <BadgesDisplay />
             </div>
           </div>
         )}
 
         {activeTab === 'planner' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-4xl mx-auto">
               <StudyPlanner />
             </div>
           </div>
         )}
 
         {activeTab === 'attention' && (
-          <div style={{ height: '100%', overflowY: 'auto', padding: '2rem' }}>
-            <div style={{ maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <span
-                  style={{
-                    fontSize: '0.68rem',
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    color: 'hsl(220 10% 40%)',
-                    fontFamily: "'JetBrains Mono', monospace",
-                  }}
-                >
-                  Monitoring
-                </span>
-                <h2
-                  style={{
-                    fontSize: '1.4rem',
-                    fontWeight: 700,
-                    color: 'hsl(220 15% 90%)',
-                    letterSpacing: '-0.02em',
-                    marginTop: '0.3rem',
-                  }}
-                >
-                  Focus & Attention
-                </h2>
-              </div>
+          <div className="h-full overflow-y-auto p-6 bg-[rgb(var(--bg-base))]">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <h2 className="text-2xl font-bold">Focus & Attention</h2>
               <AttentionMonitor />
-              <div
-                className="glass-card"
-                style={{ padding: '1.25rem' }}
-              >
-                <h3
-                  style={{
-                    fontSize: '0.9rem',
-                    fontWeight: 600,
-                    color: 'hsl(220 15% 88%)',
-                    marginBottom: '1rem',
-                    letterSpacing: '-0.01em',
-                  }}
-                >
-                  Voice Input
-                </h3>
+              <div className="gc-card p-6">
+                <h3 className="font-semibold mb-3 text-white">Voice Input</h3>
                 <VoiceInput
                   onTranscription={(text, lang) => {
                     console.log('Transcription:', text, lang);
@@ -318,8 +201,9 @@ export default function Dashboard() {
           </div>
         )}
       </main>
+
+      {/* Eye Detection - always active overlay on dashboard */}
+      <EyeDetectionOverlay />
     </div>
-    </>
   );
 }
-
