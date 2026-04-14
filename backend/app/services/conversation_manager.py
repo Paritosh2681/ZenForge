@@ -96,21 +96,39 @@ class ConversationManager:
 
     async def list_conversations(
         self,
-        limit: int = 100,
+        limit: int = 50,  # Reduced default to 50 for faster initial load
         offset: int = 0,
         include_archived: bool = False
     ) -> List[Conversation]:
-        """List all conversations"""
+        """List all conversations - optimized with single query (no N+1 problem)"""
         conn = await self.db.connect()
 
-        where_clause = "" if include_archived else "WHERE is_archived = 0"
+        where_clause = "" if include_archived else "WHERE c.is_archived = 0"
 
+        # Optimized: Single query with subquery to get first user message preview
         cursor = await conn.execute(
             f"""
-            SELECT id, title, created_at, updated_at, message_count, is_archived
-            FROM conversations
+            SELECT 
+                c.id, 
+                c.title, 
+                c.created_at, 
+                c.updated_at, 
+                c.message_count, 
+                c.is_archived,
+                SUBSTR(m.content, 1, 100) as preview
+            FROM conversations c
+            LEFT JOIN (
+                SELECT conversation_id, content,
+                       MIN(timestamp) as min_ts
+                FROM messages
+                WHERE role = 'user'
+                GROUP BY conversation_id
+            ) sub ON c.id = sub.conversation_id
+            LEFT JOIN messages m ON sub.conversation_id = m.conversation_id 
+                AND m.role = 'user' 
+                AND m.timestamp = sub.min_ts
             {where_clause}
-            ORDER BY updated_at DESC
+            ORDER BY c.updated_at DESC
             LIMIT ? OFFSET ?
             """,
             (limit, offset)
@@ -118,19 +136,6 @@ class ConversationManager:
 
         conversations = []
         async for row in cursor:
-            # Get first user message as preview
-            preview_cursor = await conn.execute(
-                """
-                SELECT content FROM messages
-                WHERE conversation_id = ? AND role = 'user'
-                ORDER BY timestamp ASC
-                LIMIT 1
-                """,
-                (row[0],)
-            )
-            preview_row = await preview_cursor.fetchone()
-            preview = preview_row[0][:100] if preview_row else None
-
             conversations.append(
                 Conversation(
                     id=row[0],
@@ -139,7 +144,7 @@ class ConversationManager:
                     updated_at=row[3],
                     message_count=row[4],
                     is_archived=bool(row[5]),
-                    preview=preview
+                    preview=row[6]
                 )
             )
 

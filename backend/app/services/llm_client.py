@@ -201,20 +201,20 @@ Use appropriate diagram types:
 - sequenceDiagram for interactions
 """
 
-        # User prompt with context
-        user_prompt = f"""Context from study materials:
+        # User prompt with context - optimized for speed
+        user_prompt = f"""Context:
 {context}
 
-Student Question: {query}
+Question: {query}
 
-Provide a clear, educational explanation STRICTLY based on the context above. If this involves a process, workflow, or structure, include a Mermaid diagram at the end."""
+Answer briefly and based ONLY on context. Keep response concise (2-3 paragraphs max)."""
 
-        # Generate response - low temperature for strict context grounding
+        # Generate response - optimized for speed: reduced tokens and context
         response = await self.generate(
             prompt=user_prompt,
             system_prompt=system_prompt,
-            temperature=0.1,
-            max_tokens=600
+            temperature=0.3,  # Slightly higher for faster convergence
+            max_tokens=350  # Reduced from 600 for ~2x faster responses
         )
 
         mermaid_diagram, cleaned_response = _extract_mermaid(response)
