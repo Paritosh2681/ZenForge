@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Local LLM Configuration (Ollama)
     # LLM Configuration
     OLLAMA_BASE_URL: str = "http://host.docker.internal:11434" if os.environ.get("WSL_DISTRO_NAME") else "http://127.0.0.1:11434"
-    OLLAMA_MODEL: str = "llama3.2:latest"  # Default model
+    OLLAMA_MODEL: str = "mistral:7b"  # Use mistral:7b (installed model)
 
     # Embedding Model (Local via sentence-transformers)
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 50
 
     # RAG Configuration
-    TOP_K_RETRIEVAL: int = 4
+    TOP_K_RETRIEVAL: int = 2  # Reduced from 4 for faster response generation
     SIMILARITY_THRESHOLD: float = 0.3
 
     # Phase 3: Conversation Storage
@@ -49,13 +49,13 @@ class Settings(BaseSettings):
     DATABASE_PATH: Path = BASE_DIR / "data" / "conversations.db"  # Alias for Phase 4
 
     # Phase 3: Context Window Management
-    MAX_CONTEXT_TOKENS: int = 3000
-    CONVERSATION_WINDOW_MESSAGES: int = 10
+    MAX_CONTEXT_TOKENS: int = 1500  # Reduced from 3000 for faster processing
+    CONVERSATION_WINDOW_MESSAGES: int = 5  # Reduced from 10 for speed
     SUMMARIZATION_TRIGGER: int = 20  # messages
     TOKEN_ESTIMATION_RATIO: float = 4.0  # chars per token
 
     # Phase 3: Query Rewriting
-    ENABLE_QUERY_REWRITING: bool = True
+    ENABLE_QUERY_REWRITING: bool = False  # Disabled for faster responses
     QUERY_REWRITE_CONTEXT_MESSAGES: int = 3
 
     # Phase 4: Assessment & Analytics

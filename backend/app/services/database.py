@@ -185,7 +185,9 @@ CREATE TABLE IF NOT EXISTS code_executions (
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_timestamp ON messages(timestamp);
+CREATE INDEX IF NOT EXISTS idx_messages_conv_role_ts ON messages(conversation_id, role, timestamp);
 CREATE INDEX IF NOT EXISTS idx_conversations_updated ON conversations(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_conversations_archived ON conversations(is_archived, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_summaries_conversation ON context_summaries(conversation_id);
 CREATE INDEX IF NOT EXISTS idx_documents_upload_date ON documents(upload_date DESC);
 CREATE INDEX IF NOT EXISTS idx_questions_quiz ON questions(quiz_id);
@@ -208,11 +210,15 @@ class Database:
     async def connect(self) -> aiosqlite.Connection:
         """Get or create database connection"""
         if self._connection is None:
-            self._connection = await aiosqlite.connect(str(self.db_path))
+            self._connection = await aiosqlite.connect(str(self.db_path), timeout=10.0)
             # Enable foreign keys
             await self._connection.execute("PRAGMA foreign_keys = ON")
             # Use WAL mode for better concurrency
             await self._connection.execute("PRAGMA journal_mode = WAL")
+            # Improve performance with synchronous=NORMAL
+            await self._connection.execute("PRAGMA synchronous = NORMAL")
+            # Increase cache size for better performance
+            await self._connection.execute("PRAGMA cache_size = 10000")
         return self._connection
 
     async def close(self):
