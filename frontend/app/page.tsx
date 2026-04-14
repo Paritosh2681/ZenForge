@@ -39,6 +39,7 @@ export default function Home() {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const bgRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -50,6 +51,20 @@ export default function Home() {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!bgRef.current) return;
+      requestAnimationFrame(() => {
+        if (!bgRef.current) return;
+        bgRef.current.style.setProperty('--mouse-x', `${e.clientX}px`);
+        bgRef.current.style.setProperty('--mouse-y', `${e.clientY}px`);
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const handleVideoPlay = () => {
@@ -73,7 +88,14 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white overflow-hidden">
-      {/* No background gradients or orbs */}
+      {/* Interactive mouse-following background effect */}
+      <div 
+        ref={bgRef}
+        className="pointer-events-none fixed inset-0 z-[1] transition-opacity duration-300"
+        style={{
+          background: "radial-gradient(circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(34,197,94,0.08), transparent 60%)",
+        }}
+      />
 
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
