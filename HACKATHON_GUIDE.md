@@ -289,17 +289,38 @@ Before Demo:
 - [ ] Run `.\Hackathon-Startup.ps1 -Monitor` in one terminal
 - [ ] Wait for all services to start (watch for ✓ marks)
 - [ ] Open http://localhost:3000/dashboard in browser
-- [ ] Verify conversations load in left sidebar
+- [ ] Verify conversations load in left sidebar (or show "No conversations yet" if fresh)
 - [ ] Send test message: "Hello" to verify AI responds
+- [ ] **Check sidebar updates with new conversation** (this proves auto-save works!)
 - [ ] If any step fails, use troubleshooting above
 
 Quick Demo Flow:
-1. Show conversation history loading
-2. Send a question: "What is machine learning?"
-3. Show AI response with sources
+1. **Show conversation auto-save in action:**
+   - Send message "Explain this concept..."
+   - Watch it appear in sidebar automatically
+   - Show message counter increasing
+   - Click back to it - full history preserved
+   
+2. **Demonstrate persistence:**
+   - Create 2-3 test conversations
+   - Restart browser (Ctrl+R)
+   - Show: "All conversations still there!"
+   
+3. **Show conversation sources:**
+   - AI response with document sources
+   - Message with auto-generated summary
+   
 4. Upload a document (if applicable)
+
 5. Generate a quiz
+
 6. Show stats/analytics
+
+**Key Talking Points:**
+- "Every message automatically saves"
+- "Conversation history persists across restarts"
+- "Full message history always available"
+- "No manual save needed - it's automatic!"
 
 ---
 

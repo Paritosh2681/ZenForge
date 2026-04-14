@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageSquare, FileText, Code, CheckSquare, Presentation, Headphones, BarChart, Trophy, Calendar, Eye, Moon, Sun, ArrowRight, LogOut, Settings } from 'lucide-react';
+import { MessageSquare, FileText, Code, CheckSquare, Presentation, Headphones, BarChart, Trophy, Calendar, Eye, Moon, Sun, ArrowRight, LogOut } from 'lucide-react';
 
 import ChatInterface from '@/components/ChatInterface';
 import DocumentUploader from '@/components/DocumentUploader';
@@ -93,9 +93,6 @@ export default function Dashboard() {
 
         <div className="flex items-center gap-3 shrink-0">
           <AccessibilityToggle />
-          <button className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-colors">
-            <Settings size={16} />
-          </button>
         </div>
       </header>
 

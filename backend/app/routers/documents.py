@@ -113,9 +113,17 @@ async def list_documents():
 
 @router.delete("/{document_id}")
 async def delete_document(document_id: str):
-    """Delete a document and its associated chunks"""
+    """Delete a document and its associated chunks from database and disk"""
     try:
-        # Remove from registry
+        # First, try to get filename by checking disk files
+        # Document files are named: {document_id}_{filename}
+        filename_from_disk = None
+        for file_path in settings.UPLOAD_DIR.glob(f"{document_id}_*"):
+            if file_path.is_file():
+                filename_from_disk = file_path.name.replace(f"{document_id}_", "", 1)
+                break
+        
+        # Remove from registry (database)
         success = await document_registry.delete_document(document_id)
         
         if not success:
@@ -124,6 +132,17 @@ async def delete_document(document_id: str):
                 detail=f"Document with ID {document_id} not found"
             )
         
+        # Remove file from disk if found
+        if filename_from_disk:
+            file_path = settings.UPLOAD_DIR / f"{document_id}_{filename_from_disk}"
+            if file_path.exists():
+                try:
+                    file_path.unlink()  # Delete the file
+                    print(f"✓ Deleted file: {file_path.name}")
+                except Exception as e:
+                    print(f"Warning: Failed to delete file from disk: {e}")
+                    # Don't fail the API call, the DB record is already deleted
+        
         # Remove from RAG engine if it exists
         try:
             await rag_engine.remove_document(document_id)
@@ -131,7 +150,8 @@ async def delete_document(document_id: str):
             # Log but don't fail if RAG removal fails
             print(f"Warning: Failed to remove document from RAG engine: {e}")
         
-        return {"message": f"Document deleted successfully"}
+        file_name = filename_from_disk or "unknown"
+        return {"message": f"Document '{file_name}' deleted successfully"}
         
     except HTTPException:
         raise
