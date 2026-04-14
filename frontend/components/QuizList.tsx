@@ -171,7 +171,7 @@ export default function QuizList({
               {/* Number of Questions */}
               <div>
                 <label className="block text-sm font-semibold text-slate-300 mb-3">
-                  Number of Questions: <span className="text-cyan-400 font-mono">{numQuestions}</span>
+                  Number of Questions: <span className="text-lime-400 font-mono">{numQuestions}</span>
                 </label>
                 <div className="relative">
                   <input
@@ -182,8 +182,7 @@ export default function QuizList({
                     onChange={(e) => setNumQuestions(parseInt(e.target.value))}
                     className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer 
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 
-                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-gradient-to-r [&::-webkit-slider-thumb]:from-cyan-400 
-                    [&::-webkit-slider-thumb]:to-purple-500 [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(0,212,255,0.5)]
+                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#22C55E] [&::-webkit-slider-thumb]:shadow-[0_0_10px_rgba(34,197,94,0.5)]
                     [&::-webkit-slider-thumb]:cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-slate-500 font-mono mt-2">
@@ -205,7 +204,7 @@ export default function QuizList({
                       onClick={() => setDifficulty(level)}
                       className={`py-2.5 px-4 rounded-lg font-semibold text-sm transition-all capitalize ${
                         difficulty === level
-                          ? 'bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-[0_0_15px_rgba(0,212,255,0.3)]'
+                          ? 'bg-[#22C55E] text-[#0D0D0D] shadow-[0_0_15px_rgba(34,197,94,0.4)]'
                           : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
                       }`}
                     >
