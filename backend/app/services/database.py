@@ -210,7 +210,7 @@ class Database:
     async def connect(self) -> aiosqlite.Connection:
         """Get or create database connection"""
         if self._connection is None:
-            self._connection = await aiosqlite.connect(str(self.db_path), timeout=10.0)
+            self._connection = await aiosqlite.connect(str(self.db_path), timeout=30.0, check_same_thread=False)
             # Enable foreign keys
             await self._connection.execute("PRAGMA foreign_keys = ON")
             # Use WAL mode for better concurrency
@@ -219,6 +219,10 @@ class Database:
             await self._connection.execute("PRAGMA synchronous = NORMAL")
             # Increase cache size for better performance
             await self._connection.execute("PRAGMA cache_size = 10000")
+            # Set busy timeout to handle locks better
+            await self._connection.execute("PRAGMA busy_timeout = 30000")
+            # Enable query optimizer
+            await self._connection.execute("PRAGMA optimize")
         return self._connection
 
     async def close(self):
