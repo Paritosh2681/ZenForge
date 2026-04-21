@@ -1,6 +1,6 @@
 # 🚀 GuruCortex - AI Learning Companion
 
-> **A 100% Local, Privacy-First AI Learning Companion** — Built by Team ZenForge for the AMD Slingshot Hackathon
+> **A 100% Local, Privacy-First AI Learning Companion** — Built by Team ZenForge for the Google Solution Challenge
 
 [![GitHub](https://img.shields.io/badge/GitHub-GuruCortex-blue?logo=github)](https://github.com/Paritosh2681/ZenForge)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
