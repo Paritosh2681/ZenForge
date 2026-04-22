@@ -1,0 +1,46 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: zenforge-backend
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+    autoscaling.knative.dev/maxScale: '2'
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        run.googleapis.com/cpu-throttling: 'false'
+    spec:
+      containerConcurrency: 10
+      timeoutSeconds: 300
+      containers:
+      - name: backend
+        image: us-central1-docker.pkg.dev/gurucortex/zenforge/zenforge-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://localhost:11434"
+        - name: OLLAMA_MODEL
+          value: "gemma:2b"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+      - name: ollama
+        image: us-central1-docker.pkg.dev/gurucortex/zenforge/ollama:latest
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        startupProbe:
+          httpGet:
+            path: /api/tags
+            port: 11434
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 20

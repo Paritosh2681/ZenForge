@@ -14,11 +14,12 @@ class Settings(BaseSettings):
     VERSION: str = "0.1.0-phase1"
     DEBUG: bool = True
 
-    # Paths (relative to project root)
+    # Paths (relative to project root or /tmp for Cloud Run)
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
-    UPLOAD_DIR: Path = BASE_DIR / "data" / "uploads"
-    VECTOR_DB_DIR: Path = BASE_DIR / "data" / "vectordb"
-    CACHE_DIR: Path = BASE_DIR / "data" / "cache"
+    DATA_ROOT: Path = Path("/tmp/zenforge") if os.environ.get("K_SERVICE") else BASE_DIR / "data"
+    UPLOAD_DIR: Path = DATA_ROOT / "uploads"
+    VECTOR_DB_DIR: Path = DATA_ROOT / "vectordb"
+    CACHE_DIR: Path = DATA_ROOT / "cache"
 
     # Local LLM Configuration (Ollama)
     # LLM Configuration
@@ -45,8 +46,8 @@ class Settings(BaseSettings):
     SIMILARITY_THRESHOLD: float = 0.25  # Slightly lowered for more context
 
     # Phase 3: Conversation Storage
-    CONVERSATION_DB_PATH: Path = BASE_DIR / "data" / "conversations.db"
-    DATABASE_PATH: Path = BASE_DIR / "data" / "conversations.db"  # Alias for Phase 4
+    CONVERSATION_DB_PATH: Path = DATA_ROOT / "conversations.db"
+    DATABASE_PATH: Path = DATA_ROOT / "conversations.db"  # Alias for Phase 4
 
     # Phase 3: Context Window Management
     MAX_CONTEXT_TOKENS: int = 1200  # Reduced from 1500 for faster local processing

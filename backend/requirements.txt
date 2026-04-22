@@ -18,6 +18,7 @@ python-docx>=1.1.0
 # RAG Pipeline (Vector Store + Embeddings)
 chromadb>=0.4.22
 sentence-transformers>=2.3.1
+tiktoken>=0.6.0
 
 # Multimodal (optional - gracefully degrades if missing)
 opencv-python-headless>=4.9.0

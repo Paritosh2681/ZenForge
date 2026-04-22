@@ -1,9 +1,13 @@
+import logging
+import traceback
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 
 # Initialize FastAPI app
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
@@ -13,13 +17,18 @@ app = FastAPI(
 # CORS Configuration (allow frontend to communicate)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],  # Next.js ports
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all origins for cloud deployment
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Health check endpoint (removed duplicate at line ~104)
+# State for minimal mode
+ROUTERS_LOADED = False
+ROUTER_ERROR = None
+ROUTER_TRACE = None
+
+# Health check endpoint
 @app.get("/api/v1/health")
 def api_health_check():
     return {"status": "ok", "message": "API is running"}
@@ -35,9 +44,12 @@ try:
     app.include_router(conversations.router)  # Phase 3: Conversation management
     app.include_router(assessments.router)  # Phase 4: Assessments & Quizzes
     app.include_router(analytics.router)  # Phase 4: Learning Analytics
+    ROUTERS_LOADED = True
 except Exception as e:
+    ROUTER_ERROR = str(e)
+    ROUTER_TRACE = traceback.format_exc()
+    logger.error(f"Failed to load routers: {e}\n{ROUTER_TRACE}")
     print(f"Warning: Could not load some routers: {e}")
-    print("Running in minimal mode with health check endpoints only")
 
 # Try to include additional optional routers
 try:
@@ -89,7 +101,16 @@ async def startup_event():
 
 @app.get("/")
 async def root():
-    """Root endpoint"""
+    """Root endpoint with status detection"""
+    if not ROUTERS_LOADED:
+        return {
+            "app": settings.APP_NAME,
+            "version": settings.VERSION,
+            "status": "minimal_mode",
+            "warning": f"Could not load some routers: {ROUTER_ERROR}",
+            "trace": ROUTER_TRACE if settings.DEBUG else None
+        }
+    
     return {
         "app": settings.APP_NAME,
         "version": settings.VERSION,
@@ -101,7 +122,7 @@ async def root():
 async def health():
     """System health check"""
     return {
-        "status": "healthy",
+        "status": "healthy" if ROUTERS_LOADED else "minimal",
         "app": settings.APP_NAME
     }
 

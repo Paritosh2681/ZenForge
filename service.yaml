@@ -1,0 +1,24 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: zenforge-backend
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    spec:
+      containers:
+      - image: -docker.pkg.dev//zenforge/zenforge-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OLLAMA_BASE_URL
+          value: "http://localhost:11434"
+        - name: OLLAMA_MODEL
+          value: "gemma:2b"
+      - image: ollama/ollama:latest
+        env:
+        - name: OLLAMA_HOST
+          value: "0.0.0.0"
+        # We'll need a startup command to pull the model if not pre-baked
+        # Alternatively, use a custom image with the model pre-loaded

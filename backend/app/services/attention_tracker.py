@@ -117,7 +117,7 @@ class AttentionTracker:
             "looking_at_screen": alignment_score > self.ATTENTION_THRESHOLD
         }
 
-    def analyze_frame(self, frame: np.ndarray) -> Optional[Dict]:
+    def analyze_frame(self, frame: "np.ndarray") -> Optional[Dict]:
         """Analyze single frame for attention metrics"""
         # Convert BGR to RGB
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

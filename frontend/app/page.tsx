@@ -122,8 +122,6 @@ export default function Home() {
                 <a
                   key={item.label}
                   href={item.href}
-                  target={item.external ? "_blank" : undefined}
-                  rel={item.external ? "noopener noreferrer" : undefined}
                   className="text-sm text-[#A1A1AA] hover:text-white transition-colors"
                 >
                   {item.label}
