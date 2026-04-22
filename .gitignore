@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+backend/.env
+
+# Node
+node_modules/
+.next/
+out/
+
+# Data & Database (local only - regenerated at runtime)
+data/
+backend/data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp files (Claude, tests, etc.)
+tmpclaude-*
+nul
+test_venv/
+get-pip.py
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db

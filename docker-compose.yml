@@ -1,0 +1,50 @@
+services:
+  # Backend API - FastAPI + RAG Pipeline
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: zenforge-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=mistral:7b
+      - SIMILARITY_THRESHOLD=0.3
+      - DEBUG=false
+    volumes:
+      - zenforge-data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+  # Frontend - Next.js Production Build
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+    container_name: zenforge-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  zenforge-data:
+    driver: local
+
+networks:
+  default:
+    name: zenforge-network
