@@ -170,51 +170,36 @@ class OllamaClient:
         generate_diagram: bool = True,
         system_prompt: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Generate response with RAG context and optional Mermaid diagram"""
+        """Generate response with RAG context optimized for local models."""
 
         # Build context from retrieved chunks
         context = "\n\n---\n\n".join(context_chunks)
 
-        # System prompt for educational assistance
+        # Refined system prompt for local LLM efficiency
         if not system_prompt:
-            system_prompt = """You are Guru-Agent, an empathetic AI learning companion. Your role is to:
-1. Help students understand concepts deeply, not just provide answers
-2. Use the Socratic method when appropriate
-3. Break down complex topics into digestible steps
-4. Encourage critical thinking
+            system_prompt = """You are Guru-Agent, a helpful AI tutor. 
+GUIDELINES:
+1. Provide accurate, direct answers based ONLY on the provided context.
+2. If the context doesn't contain the answer, say you don't know based on the documents.
+3. Be concise. Avoid conversational filler.
+4. If appropriate, include a simple Mermaid diagram at the end using ```mermaid blocks.
 
-CRITICAL RULES:
-- ONLY answer using the provided "Context from study materials".
-- If the answer cannot be found in the context, explicitly say "I do not have enough information in the provided context to answer this." Do not make up information.
+CRITICAL: Do not hallucinate. Stay strictly grounded in the 'Context' provided."""
 
-When explaining processes, workflows, or hierarchical concepts, YOU MUST include a Mermaid.js diagram.
-Format: End your response with:
-
-```mermaid
-[diagram code here]
-```
-
-Use appropriate diagram types:
-- flowchart TD/LR for processes
-- graph for relationships
-- classDiagram for structures
-- sequenceDiagram for interactions
-"""
-
-        # User prompt with context - optimized for speed
+        # Direct user prompt for faster local processing
         user_prompt = f"""Context:
 {context}
 
 Question: {query}
 
-Answer briefly and based ONLY on context. Keep response concise (2-3 paragraphs max)."""
+Instructions: Answer concisely using the Context above. If not in Context, state that."""
 
-        # Generate response - optimized for speed: reduced tokens and context
+        # Generate response - optimized for speed
         response = await self.generate(
             prompt=user_prompt,
             system_prompt=system_prompt,
-            temperature=0.3,  # Slightly higher for faster convergence
-            max_tokens=350  # Reduced from 600 for ~2x faster responses
+            temperature=0.1,  # Lower temperature for more consistent/accurate local output
+            max_tokens=300    # Strict limit for faster responses
         )
 
         mermaid_diagram, cleaned_response = _extract_mermaid(response)

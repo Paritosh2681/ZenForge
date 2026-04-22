@@ -48,32 +48,44 @@ class AssessmentGenerator:
         questions: List[QuestionCreate] = []
         random.shuffle(chunks)
 
+        import asyncio
+
+        # Create tasks for parallel generation
+        tasks = []
         for i, question_spec in enumerate(question_distribution):
-            try:
-                chunk = chunks[i % len(chunks)]
-                question = await self._generate_single_question(
+            chunk = chunks[i % len(chunks)]
+            tasks.append(self._generate_single_question(
+                chunk=chunk,
+                question_type=question_spec["type"],
+                difficulty=question_spec["difficulty"],
+            ))
+
+        # Run all generation tasks concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        questions: List[QuestionCreate] = []
+        for i, question in enumerate(results):
+            if isinstance(question, Exception):
+                logger.error("Failed to generate question %d: %s", i, question)
+                continue
+            
+            if not question:
+                continue
+
+            # Grounding check and fallback logic
+            chunk = chunks[i % len(chunks)]
+            question_spec = question_distribution[i]
+            
+            if not self._is_question_grounded(question, chunk):
+                logger.warning("Generated question not grounded. Using deterministic fallback.")
+                question = self._build_grounded_fallback(
                     chunk=chunk,
                     question_type=question_spec["type"],
                     difficulty=question_spec["difficulty"],
                 )
 
-                if not question:
-                    continue
-
-                if not self._is_question_grounded(question, chunk):
-                    logger.warning("Generated question not grounded. Using deterministic fallback.")
-                    question = self._build_grounded_fallback(
-                        chunk=chunk,
-                        question_type=question_spec["type"],
-                        difficulty=question_spec["difficulty"],
-                    )
-
-                if question:
-                    questions.append(question)
-
-            except Exception as e:
-                logger.error("Failed to generate question: %s", e)
-                continue
+            if question:
+                questions.append(question)
 
         logger.info("Generated %d questions successfully", len(questions))
         return questions

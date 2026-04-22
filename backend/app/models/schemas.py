@@ -45,7 +45,7 @@ class ChatRequest(BaseModel):
     conversation_id: Optional[str] = None
     document_ids: Optional[List[str]] = None
     include_sources: bool = True
-    generate_diagram: bool = True  # Auto-generate Mermaid if applicable
+    generate_diagram: bool = True
 
 class SourceChunk(BaseModel):
     """Retrieved source chunk with metadata"""
@@ -58,7 +58,7 @@ class ChatResponse(BaseModel):
     """AI response with sources and optional diagram"""
     response: str
     sources: List[SourceChunk]
-    mermaid_diagram: Optional[str] = None  # Mermaid.js diagram code
+    mermaid_diagram: Optional[str] = None
     conversation_id: str
     timestamp: datetime
 

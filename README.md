@@ -20,6 +20,7 @@
 - **⚡ Instant Setup:** Single-command deployment with Docker or native scripts
 - **🎓 Smart Learning:** AI-powered document analysis, quiz generation, and spaced repetition
 - **🎨 Modern Interface:** Beautiful, responsive UI built with Next.js and Tailwind CSS
+- **☁️ Cloud-Ready:** Optimized for Google Cloud deployment with Ollama sidecar support
 - **🔌 Offline-Ready:** Works completely offline after initial model download
 
 ---
@@ -33,8 +34,9 @@
 - **Citation Source Tracking:** Know exactly where answers come from
 
 ### 🤖 AI-Powered Learning
-- **Local LLM Integration:** Run Mistral-7B, Llama-3.2, or other models via Ollama
+- **Local LLM Integration:** Run Gemma, Mistral, Llama, or other models via Ollama
 - **Context-Aware Responses:** RAG engine retrieves relevant document excerpts for accurate answers
+- **Parallel Quiz Generation:** Create comprehensive 10-question quizzes in under 45 seconds
 - **Generative Diagrams:** Auto-generates Mermaid diagrams from document content
 - **Multi-Turn Conversations:** Maintain context across multiple queries
 
@@ -456,6 +458,33 @@ docker run -p 3000:3000 zenforge-frontend
 
 ---
 
+## ☁️ Google Cloud Deployment
+
+ZenForge is optimized for deployment on **Google Cloud Run** using a sidecar architecture for Ollama.
+
+### Prerequisites
+- Google Cloud SDK installed and configured
+- A Google Cloud Project with Billing enabled
+
+### Deploying in 5 Minutes
+1. **Configure gcloud**:
+   ```bash
+   gcloud config set project [YOUR_PROJECT_ID]
+   ```
+2. **Run the Deployment Script**:
+   ```bash
+   sh scripts/gcp-deploy.sh
+   ```
+This script automates:
+- Building and pushing images to **Artifact Registry**
+- Deploying the backend to **Cloud Run** with an **Ollama Sidecar**
+- Deploying the frontend with the correct API connections
+
+### Sidecar Benefits
+By running Ollama as a sidecar, the application maintains its "local-first" privacy and performance even in the cloud, with zero external API latency and full data sovereignty.
+
+---
+
 ## 🔧 Configuration
 
 ### Backend Configuration
@@ -463,7 +492,7 @@ Edit `backend/app/config.py`:
 ```python
 # Model settings
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # or any sentence-transformers model
-LLM_MODEL = "mistral:7b"
+LLM_MODEL = "gemma:2b"  # Fast, accurate Google model
 
 # Vector DB settings
 CHUNK_SIZE = 500

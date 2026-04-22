@@ -39,7 +39,7 @@ echo.
 echo ============================================================
 echo OFFLINE FEATURES READY:
 echo - Document processing ^& RAG (PDF, DOCX, PPTX)
-echo - AI Chat with Ollama (llama3.2:latest)  
+echo - AI Chat with Ollama (gemma)  
 echo - Adaptive Quiz System
 echo - Code Execution Sandbox
 echo - Podcast Generation

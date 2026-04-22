@@ -9,7 +9,7 @@ import Link from 'next/link';
 const TERMINAL_SEQUENCE = [
   { type: 'command', text: 'gurucortex init --mode=autonomous', delay: 0 },
   { type: 'status', text: '▸ Booting neural pathways...', delay: 400 },
-  { type: 'check', text: '✓ Loading LLM (Mistral-7B-v0.2)', delay: 600 },
+  { type: 'check', text: '✓ Loading LLM (gemma 4 4/9B)', delay: 600 },
   { type: 'check', text: '✓ Initializing Vector Store (ChromaDB)', delay: 200 },
   { type: 'check', text: '✓ Establishing Local Data Stream', delay: 200 },
   { type: 'ready', text: '▸ System ready. Awaiting input', delay: 800 },

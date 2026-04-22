@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     # Local LLM Configuration (Ollama)
     # LLM Configuration
     OLLAMA_BASE_URL: str = "http://host.docker.internal:11434" if os.environ.get("WSL_DISTRO_NAME") else "http://127.0.0.1:11434"
-    OLLAMA_MODEL: str = "mistral:7b"  # Use mistral:7b (installed model)
+    OLLAMA_MODEL: str = "gemma:2b"  # Fast version of Google Gemma
 
     # Embedding Model (Local via sentence-transformers)
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
@@ -41,16 +41,16 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 50
 
     # RAG Configuration
-    TOP_K_RETRIEVAL: int = 2  # Reduced from 4 for faster response generation
-    SIMILARITY_THRESHOLD: float = 0.3
+    TOP_K_RETRIEVAL: int = 6  # Increased from 4 for better accuracy/context grounding
+    SIMILARITY_THRESHOLD: float = 0.25  # Slightly lowered for more context
 
     # Phase 3: Conversation Storage
     CONVERSATION_DB_PATH: Path = BASE_DIR / "data" / "conversations.db"
     DATABASE_PATH: Path = BASE_DIR / "data" / "conversations.db"  # Alias for Phase 4
 
     # Phase 3: Context Window Management
-    MAX_CONTEXT_TOKENS: int = 1500  # Reduced from 3000 for faster processing
-    CONVERSATION_WINDOW_MESSAGES: int = 5  # Reduced from 10 for speed
+    MAX_CONTEXT_TOKENS: int = 1200  # Reduced from 1500 for faster local processing
+    CONVERSATION_WINDOW_MESSAGES: int = 4  # Reduced from 5 for speed
     SUMMARIZATION_TRIGGER: int = 20  # messages
     TOKEN_ESTIMATION_RATIO: float = 4.0  # chars per token
 

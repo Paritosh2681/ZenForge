@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Local LLM Configuration (Ollama)
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "mistral:7b"
+    OLLAMA_MODEL: str = "gemma:7b"
 
     class Config:
         env_file = ".env"
