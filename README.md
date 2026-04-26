@@ -1,6 +1,6 @@
 # 🚀 GuruCortex - AI Learning Companion
 
-> **A 100% Local, Privacy-First AI Learning Companion** — Built by Team ZenForge for the AMD Slingshot Hackathon
+> **A 100% Local, Privacy-First AI Learning Companion** — Built by Team ZenForge for the Google Solution Challenge
 
 [![GitHub](https://img.shields.io/badge/GitHub-GuruCortex-blue?logo=github)](https://github.com/Paritosh2681/ZenForge)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
@@ -16,8 +16,8 @@
 
 ### Why GuruCortex?
 
-- **🔒 Complete Privacy:** 100% local processing, zero cloud APIs, no data telemetry
-- **⚡ Instant Setup:** Single-command deployment with Docker or native scripts
+- **🔒 Complete Privacy:** 100% local processing, cloud APIs, no data telemetry
+- **⚡ Instant Setup:** Single-command deployment with Google cloud and Docker or native scripts
 - **🎓 Smart Learning:** AI-powered document analysis, quiz generation, and spaced repetition
 - **🎨 Modern Interface:** Beautiful, responsive UI built with Next.js and Tailwind CSS
 - **☁️ Cloud-Ready:** Optimized for Google Cloud deployment with Ollama sidecar support
@@ -89,7 +89,7 @@
 
 - **Windows, macOS, or Linux**
 - **Docker & Docker Compose** (recommended) OR **Python 3.11+** & **Node.js 18+**
-- **Ollama** installed with a model pulled (e.g., `ollama pull llama3.2`)
+- **Ollama** installed with a model pulled (e.g., `ollama pull Gemma 4`)
 
 ### Option 1: One-Command Setup (Windows)
 
@@ -340,7 +340,7 @@ User Document
 
 ## 🔒 Privacy & Security
 
-### Zero Cloud Dependency
+### Cloud Dependency
 - **No external APIs** are called for processing documents
 - **No telemetry** or usage tracking
 - **No API keys** required for core features
