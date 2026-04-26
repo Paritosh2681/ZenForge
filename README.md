@@ -76,7 +76,7 @@
 | | LangChain | RAG orchestration |
 | | PyPDF2, python-docx, python-pptx | Document parsing |
 | **LLM** | Ollama | Local inference engine |
-| | Mistral-7B, Llama-3.2 | Large language models |
+| | Gemma 4-7B, Gemma-3.2 | Large language models |
 | **Storage** | SQLite | Metadata & conversations |
 | | Local filesystem | Document & vector storage |
 | **DevOps** | Docker, Docker Compose | Containerization & orchestration |
