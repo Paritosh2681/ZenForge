@@ -78,7 +78,7 @@
 | **Computer Vision** | MediaPipe, OpenCV | Attention tracking & image processing |
 | **Speech** | speech-recognition, pyttsx3 | Voice input & TTS |
 | **LLM Inference** | Ollama | Local model serving |
-| | Mistral-7B, Llama-3.2 | Open-source language models |
+| | Google Gemma 4 (4B parameters) | Efficient, lightweight language model |
 | **Databases** | SQLite | Conversations, quizzes, analytics |
 | | ChromaDB | Vector embeddings persistence |
 | **DevOps** | Docker, Docker Compose | Containerization & orchestration |
@@ -94,7 +94,7 @@
 - **Option A (Docker):** Docker Desktop & Docker Compose installed
 - **Option B (Native):** Python 3.11+, Node.js 18+, and Ollama
 - **Hardware:** Minimum 8GB RAM (16GB+ recommended for optimal performance)
-- **Ollama:** Pre-installed with a model pulled (e.g., `ollama pull mistral` or `ollama pull llama2`)
+- **Ollama:** Pre-installed with model pulled (`ollama pull gemma4:4b`)
 
 ### Option 1: Docker Setup (Recommended - One Command)
 
@@ -580,7 +580,7 @@ Edit `backend/app/config.py`:
 ```python
 # Model settings
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # or any sentence-transformers model
-LLM_MODEL = "gemma:2b"  # Fast, accurate Google model
+LLM_MODEL = "gemma4:4b"  # Google Gemma 4 with 4B parameters
 
 # Vector DB settings
 CHUNK_SIZE = 500
