@@ -1,4 +1,4 @@
-# 🚀 ZenForge - AI-Powered Learning Platform
+# 🚀 GuruCortex - AI Learning Companion
 
 > **A Comprehensive AI Learning Companion for Equitable Education** — Built by Team ZenForge for the Google Solution Challenge 2026
 
@@ -12,9 +12,9 @@
 
 ## 📋 Overview
 
-**ZenForge** is a full-stack, intelligent **AI Learning Companion** combining Retrieval-Augmented Generation (RAG), multimodal capabilities, and advanced assessment features. It delivers personalized, engaging learning experiences with a modern Next.js frontend and powerful FastAPI backend—designed for offline-first usage and local privacy.
+**GuruCortex** is a full-stack, intelligent **AI Learning Companion** combining Retrieval-Augmented Generation (RAG), multimodal capabilities, and advanced assessment features. It delivers personalized, engaging learning experiences with a modern Next.js frontend and powerful FastAPI backend—designed for offline-first usage and local privacy.
 
-### Why ZenForge?
+### Why GuruCortex?
 
 - **🔒 Privacy-First:** 100% local processing with optional cloud integration for scalability
 - **🌍 Equitable Access:** Enables learning without internet dependency—perfect for underserved communities
@@ -100,8 +100,8 @@
 
 ```bash
 # Clone repository
-git clone https://github.com/Paritosh2681/ZenForge.git
-cd ZenForge
+git clone https://github.com/Paritosh2681/GuruCortex.git
+cd GuruCortex
 
 # Start complete system (Windows)
 .\docker-compose.full.yml up -d
@@ -186,7 +186,7 @@ This sets up a fully offline environment with local models.
 ## 📁 Project Structure
 
 ```
-ZenForge/
+GuruCortex/
 ├── README.md                           # Main documentation (you are here)
 ├── QUICKSTART.md                       # Quick reference guide
 ├── MVP_SNAPSHOT.md                     # Current MVP status
@@ -332,499 +332,349 @@ ZenForge/
 
 ## 🔄 How It Works
 
-### 📖 Document Processing Pipeline
-```
-User Upload (PDF/DOCX/PPTX/TXT)
-    ↓
-[Text Extraction] (PyPDF2, python-docx, python-pptx)
-    ↓
-[Intelligent Chunking] (Semantic segmentation)
-    ↓
-[Embedding Generation] (sentence-transformers)
-    ↓
-[Vector Storage] (ChromaDB indexed database)
-```
+### 1️⃣ Document Upload
+Users upload documents (PDF, DOCX, PPTX, or TXT) through the web interface.
 
-### 💬 Query & Response Pipeline
-```
-User Question
-    ↓
-[Query Embedding] (Convert to vector)
-    ↓
-[Semantic Retrieval] (Find similar chunks)
-    ↓
-[Context Assembly] (Combine with document metadata)
-    ↓
-[LLM Generation] (Ollama processes with context)
-    ↓
-[Response Streaming] (Real-time delivery to frontend)
-    ↓
-[Conversation Storage] (Persist in SQLite)
-```
-
-### 🎓 Assessment & Learning Pipeline
+### 2️⃣ Processing Pipeline
 ```
 Document Upload
     ↓
-[Automatic Topic Extraction] (Identify key concepts)
+[Text Extraction] (PyPDF2, python-docx, python-pptx)
     ↓
-[Quiz Generation] (LLM creates questions)
+[Chunking] (Semantic segmentation)
     ↓
-[Answer Validation] (Evaluate user responses)
+[Embedding] (sentence-transformers)
     ↓
-[SM-2 Scheduling] (Calculate review intervals)
-    ↓
-[Mastery Tracking] (Update learning levels)
-    ↓
-[Analytics Update] (Generate insights & recommendations)
+[Storage] (ChromaDB Vector Database)
 ```
 
-### 👁️ Attention Tracking Pipeline
+### 3️⃣ Query Processing
 ```
-User Starts Learning
+User Question
     ↓
-[Webcam Activation] (MediaPipe initialization)
+[Embedding] (Convert query to vector)
     ↓
-[Face Detection] (Real-time gaze tracking)
+[Retrieval] (Find similar chunks from ChromaDB)
     ↓
-[Focus Scoring] (Calculate attention percentage)
+[Context Building] (Combine chunks for LLM)
     ↓
-[Alert Generation] (Notify if focus drops)
+[LLM Processing] (Ollama generates response)
     ↓
-[Metrics Storage] (Record in analytics database)
+[Response Delivery] (Streamed to frontend)
+```
+
+### 4️⃣ Assessment & Learning
+```
+User Document
+    ↓
+[Topic Extraction] (Identify key concepts)
+    ↓
+[Quiz Generation] (Create questions)
+    ↓
+[Answer Evaluation] (Check against rubric)
+    ↓
+[Spaced Repetition] (SM-2 algorithm scheduling)
+    ↓
+[Analytics Update] (Track progress)
 ```
 
 ---
 
-## 📚 Supported Document Formats
+## 📚 Supported File Types
 
-| Format | Extension | Status | Use Case |
-|--------|-----------|--------|----------|
-| **PDF** | `.pdf` | ✅ Fully Supported | Textbooks, research papers, manuals |
-| **Word** | `.docx` | ✅ Fully Supported | Lecture notes, documents |
-| **PowerPoint** | `.pptx` | ✅ Fully Supported | Presentations, slides |
-| **Plain Text** | `.txt`, `.md` | ✅ Fully Supported | Notes, markdown files |
-| **Code** | `.py`, `.js`, `.java` | ✅ Fully Supported | Learning programming |
-| **Images** | `.jpg`, `.png`, `.gif` | ✅ Via ML models | Visual content analysis |
+| Format | Extension | Status |
+|--------|-----------|--------|
+| Portable Document Format | `.pdf` | ✅ Fully Supported |
+| Microsoft Word | `.docx` | ✅ Fully Supported |
+| Microsoft PowerPoint | `.pptx` | ✅ Fully Supported |
+| Plain Text | `.txt`, `.md` | ✅ Fully Supported |
+| Python Code | `.py` | ✅ Fully Supported |
+| Images (Analysis) | `.jpg`, `.png`, `.gif` | ✅ Supported via ML |
 
 ---
 
-## 🎓 Feature Implementation Status
+## 🎓 Features Overview
 
-### ✅ Phase 1: Core RAG Foundation - COMPLETE
-- Document upload and multi-format support
-- Intelligent text chunking
-- Vector embeddings with ChromaDB
-- Semantic search capabilities
-- RAG-enhanced chat interface
-- Ollama LLM integration
-- RESTful API with FastAPI
+### Phase 1: Core RAG Foundation ✅ COMPLETE
+- Document upload and processing
+- Vector embedding and search
+- Chat interface with context
+- Local LLM integration
+- API documentation
 
-### ✅ Phase 2: Multimodal Integration - COMPLETE
+### Phase 2: Multimodal & Accessibility ✅ COMPLETE
 - Image upload and analysis
-- Real-time attention tracking via webcam
-- Voice input (speech-to-text)
-- Text-to-speech synthesis
-- Multi-language document support
-- Vision-language capabilities
+- Attention tracking (webcam)
+- Voice input (Speech Recognition)
+- Text-to-Speech output
+- Multi-language support
 
-### ✅ Phase 3: Conversation Management - COMPLETE
+### Phase 3: Conversations & Context ✅ COMPLETE
 - Persistent conversation history
-- Context window optimization
-- Smart query rewriting
-- Conversation filtering and search
-- Session management
-- Data export functionality
+- Context window management
+- Query rewriting
+- Conversation search
+- Export functionality
 
-### ✅ Phase 4: Assessment & Analytics - COMPLETE
-- **Quiz Generation:** MCQ, True/False, Short Answer
-- **Automatic Grading:** LLM-based evaluation
-- **Spaced Repetition (SM-2):** Research-backed algorithm
-- **Mastery Tracking:** Novice → Intermediate → Advanced
-- **Learning Analytics:** Performance insights and dashboards
-- **Study Recommendations:** Personalized learning paths
-- **Topic Extraction:** Automatic learning objectives
-- **Progress Visualization:** Charts and statistics
+### Phase 4: Assessment & Learning Analytics ✅ COMPLETE
+- Quiz generation (MCQ, T/F, Short Answer)
+- Automatic grading
+- Spaced repetition scheduling
+- Mastery level tracking
+- Learning analytics dashboard
+- Study recommendations
 
 ---
 
-## 🔒 Privacy, Security & Data Sovereignty
+## 🔒 Privacy & Security
 
-### Privacy-First Architecture
-- **Zero External APIs:** All processing happens locally
-- **No Telemetry:** No usage tracking or analytics collection
-- **No Authentication Required:** Works offline without login
-- **No Data Sharing:** Your data never leaves your machine
+### Zero Cloud Dependency
+- **No external APIs** are called for processing documents
+- **No telemetry** or usage tracking
+- **No API keys** required for core features
+- **All data stays local** in the `./data` directory
+GuruCortex
+### Offline Capability
+GuruCortex works completely offline after initial setup:
+1. Documents are processed locally
+2. Embeddings are generated and stored locally
+3. LLM inference via Ollama (running on your machine)
+4. No internet connection needed for core features
 
-### Data Storage & Control
-All data is stored locally in the `./data` directory:
-- `./data/uploads/` - Uploaded documents
-- `./data/vectordb/` - ChromaDB embeddings
-- `./data/conversations.db` - Chat and quiz history
-- `./data/analytics/` - Learning metrics
-
-**Complete Ownership:** You have full control and can delete or backup data anytime.
+### Data Persistence
+- **SQLite Database:** Conversations and quiz results
+- **ChromaDB:** Vector embeddings for semantic search
+- **File Storage:** Uploaded documents in `./data/uploads`
+- **You own your data:** Full control and accessibility
 
 ### Security Best Practices
-- CORS configured for localhost only
-- Input validation on all endpoints
-- Secure file upload with type checking
-- Rate limiting on API endpoints
+- CORS enabled only for localhost
 - No sensitive data in logs
-- SQLite encryption-ready
+- Secure file upload validation
+- Rate limiting on API endpoints
 
-### Offline Capability
-ZenForge works completely offline:
-1. Download and cache required models during initial setup
-2. All document processing occurs locally
-3. Vector embeddings generated on-device
-4. LLM inference via local Ollama instance
-5. No internet connection needed for core features
+---
 
-**Setup for Offline Use:**
+### Offline Mode Setup
+
+GuruCortex includes dedicated offline setup scripts. All components can run without internet:
+
 ```bash
-# Windows
+# Automated offline setup (Windows)
 .\Setup-Offline-AI.bat
 
-# macOS/Linux
-./scripts/setup.sh
+# Or use Python setup (cross-platform)
+python setup_offline.py
 
-# Verify: Disconnect internet and launch application
+# Start in offline mode
+.\Start-GuruCortex.bat
 ```
+
+**Offline Verification:**
+1. Disconnect from internet
+2. Launch GuruCortex
+3. Verify document processing, chat, quizzes, and analytics work
+
+See [OFFLINE_MODE.md](OFFLINE_MODE.md) for detailed instructions.
 
 ---
 
 ## 🌐 API Documentation
 
-### Auto-Generated Interactive Docs
-Once backend is running, visit:
+### Auto-Generated OpenAPI Docs
+Once the backend is running, visit:
 ```
-http://localhost:8000/docs        # Swagger UI
-http://localhost:8000/redoc       # ReDoc documentation
+http://localhost:8000/docs
 ```
 
-### Core API Endpoints
+### Key Endpoints
 
-#### Document Management
-- `POST /api/v1/documents/upload` - Upload documents
-- `GET /api/v1/documents` - List all documents
-- `GET /api/v1/documents/{doc_id}` - Get document details
-- `DELETE /api/v1/documents/{doc_id}` - Delete document
+#### Documents
+- `POST /api/documents/upload` - Upload a document
+- `GET /api/documents` - List uploaded documents
+- `DELETE /api/documents/{doc_id}` - Delete a document
 
-#### Chat & Retrieval
-- `POST /api/v1/chat/query` - Query with streaming response
-- `GET /api/v1/chat/history` - Get conversation history
-- `GET /api/v1/conversations` - List all conversations
-- `DELETE /api/v1/conversations/{conv_id}` - Delete conversation
+#### Chat
+- `POST /api/chat/query` - Query documents with streaming response
+- `GET /api/chat/history` - Get conversation history
+- `DELETE /api/chat/clear` - Clear conversation
 
-#### Assessment & Quizzes
-- `POST /api/v1/assessments/generate` - Generate quiz
-- `POST /api/v1/assessments/submit` - Submit quiz answer
-- `GET /api/v1/assessments/results` - Get quiz results
-- `GET /api/v1/assessments/mastery` - Get mastery levels
+#### Assessment
+- `POST /api/assessment/generate-quiz` - Generate a quiz
+- `POST /api/assessment/submit-answer` - Submit quiz answer
+- `GET /api/assessment/results` - Get quiz results
+- `GET /api/assessment/analytics` - Get learning analytics
 
-#### Learning Analytics
-- `GET /api/v1/analytics/dashboard` - Dashboard metrics
-- `GET /api/v1/analytics/progress` - Learning progress
-- `GET /api/v1/analytics/recommendations` - Study recommendations
-- `GET /api/v1/analytics/export` - Export learning data
-
-#### System
-- `GET /api/v1/health` - System health check
-- `GET /api/v1/config` - Current configuration
+#### Health
+- `GET /api/health` - System health status
+- `GET /api/config` - Current configuration
 
 ---
 
 ## 🐳 Docker Deployment
 
-### Quick Start with Docker Compose
+### Using Docker Compose (Recommended)
 
 ```bash
-# Start all services
+# Start services
 docker-compose -f docker-compose.full.yml up -d
 
-# View service status
+# Check service status
 docker ps
-docker-compose ps
 
-# Check logs
-docker-compose logs -f              # All services
-docker-compose logs -f backend      # Backend only
-docker-compose logs -f frontend     # Frontend only
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
 
-# Stop all services
+# Stop services
 docker-compose down
-
-# Stop and remove all data
-docker-compose down -v
 ```
 
-### Building Individual Containers
+### Building Custom Containers
 
 ```bash
-# Build backend image
-docker build -t zenforge-backend:latest ./backend
+# Build just backend
+docker build -t gurucortex-backend ./backend
 
-# Build frontend image  
-docker build -t zenforge-frontend:latest ./frontend
+# Build just frontend
+docker build -t gurucortex-frontend ./frontend
 
-# Run backend
-docker run -p 8000:8000 \
-  -v $(pwd)/data:/app/data \
-  zenforge-backend:latest
-
-# Run frontend
-docker run -p 3000:3000 \
-  zenforge-frontend:latest
-```
-
-### Custom Docker Configuration
-
-Edit `docker-compose.yml`:
-```yaml
-backend:
-  environment:
-    - EMBEDDING_MODEL=all-MiniLM-L6-v2
-    - LLM_MODEL=mistral
-    - CHUNK_SIZE=500
-    - MAX_UPLOAD_SIZE_MB=100
+# Run containers manually
+docker run -p 8000:8000 gurucortex-backend
+docker run -p 3000:3000 gurucortex-frontend
 ```
 
 ---
 
 ## ☁️ Google Cloud Deployment
 
-ZenForge is optimized for Google Cloud with automated deployment using Ollama sidecars for local inference.
+GuruCortex is optimized for deployment on **Google Cloud Run** using a sidecar architecture for Ollama.
 
 ### Prerequisites
-- Google Cloud SDK (`gcloud` CLI)
-- Active GCP Project with Billing enabled
-- Authentication: `gcloud auth login`
+- Google Cloud SDK installed and configured
+- A Google Cloud Project with Billing enabled
 
-### Deployment Script (5 Minutes)
+### Deploying in 5 Minutes
+1. **Configure gcloud**:
+   ```bash
+   gcloud config set project [YOUR_PROJECT_ID]
+   ```
+2. **Run the Deployment Script**:
+   ```bash
+   sh scripts/gcp-deploy.sh
+   ```
+This script automates:
+- Building and pushing images to **Artifact Registry**
+- Deploying the backend to **Cloud Run** with an **Ollama Sidecar**
+- Deploying the frontend with the correct API connections
 
-```bash
-# Configure your GCP project
-gcloud config set project YOUR_PROJECT_ID
-
-# Run deployment script
-sh scripts/gcp-deploy.sh
-```
-
-This automates:
-- Building container images
-- Pushing to Google Artifact Registry
-- Deploying backend to Cloud Run
-- Deploying frontend to Cloud Run
-- Configuring Ollama sidecar for inference
-- Setting up environment variables
-
-### Cloud Architecture
-```
-User Browser
-    ↓
-Frontend (Cloud Run)
-    ↓
-Backend API (Cloud Run)
-    ↓
-Ollama Sidecar (Local inference)
-    ↓
-Local Vector Database (Cloud Storage)
-```
-
-### Benefits of Cloud Deployment
-- ⚡ Global CDN for frontend
-- 🔄 Auto-scaling backend
-- 💾 Persistent storage on Cloud Storage
-- 🔒 Data still processed locally via Ollama sidecar
-- 💰 Pay only for resources used
+### Sidecar Benefits
+By running Ollama as a sidecar, the application maintains its "local-first" privacy and performance even in the cloud, with zero external API latency and full data sovereignty.
 
 ---
 
-## ⚙️ Configuration Guide
+## 🔧 Configuration
 
 ### Backend Configuration
 Edit `backend/app/config.py`:
-
 ```python
-# LLM and Embedding Models
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Fast embedding model
-LLM_MODEL = "mistral"                  # Open-source LLM
-OLLAMA_BASE_URL = "http://localhost:11434"
+# Model settings
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # or any sentence-transformers model
+LLM_MODEL = "gemma:2b"  # Fast, accurate Google model
 
-# Vector Database
-CHUNK_SIZE = 500           # Characters per chunk
-CHUNK_OVERLAP = 50         # Overlap for context
-EMBED_BATCH_SIZE = 32      # Embeddings per batch
+# Vector DB settings
+CHUNK_SIZE = 500
+CHUNK_OVERLAP = 50
 
-# API Configuration
+# API settings
 MAX_UPLOAD_SIZE_MB = 100
-API_RATE_LIMIT = 100       # Requests per minute
-CORS_ORIGINS = ["http://localhost:3000"]
-
-# Database
-DATABASE_URL = "sqlite:///./data/conversations.db"
-
-# Learning
-SM2_EASY_FACTOR = 2.5
-SM2_HARD_FACTOR = 1.3
+OLLAMA_BASE_URL = "http://localhost:11434"
 ```
 
 ### Frontend Configuration
 Edit `frontend/lib/api-client.ts`:
-
 ```typescript
-// API Configuration
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
-                            'http://localhost:8000';
+// API endpoint configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-// Timeouts (milliseconds)
-export const REQUEST_TIMEOUT = 30000;
-export const STREAM_TIMEOUT = 120000;
-
-// UI Settings
-export const ITEMS_PER_PAGE = 10;
-export const AUTO_SAVE_INTERVAL = 5000;
-```
-
-### Environment Variables
-
-Create `.env.local` in frontend:
-```bash
-NEXT_PUBLIC_API_URL=http://localhost:8000
-NEXT_PUBLIC_APP_NAME=ZenForge
-NEXT_PUBLIC_MAX_FILE_SIZE=104857600
+// Request timeout (ms)
+const REQUEST_TIMEOUT = 30000;
 ```
 
 ---
 
-## 🚀 Performance Optimization
+## 🚀 Performance Tips
 
-### Backend Optimization
+### Optimize Embeddings
+Use smaller models for faster processing:
 ```python
-# 1. Use faster embedding model
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # vs all-mpnet-base-v2
-
-# 2. Optimize chunk size
-CHUNK_SIZE = 300        # Smaller = faster retrieval
-CHUNK_OVERLAP = 30      # Reduce overlap
-
-# 3. Batch processing
-# Embed multiple documents together for efficiency
-
-# 4. Cache embeddings
-# Reuse embeddings for duplicate content
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Smaller, faster
+# Instead of: "all-mpnet-base-v2"      # Larger, more accurate
 ```
 
-### Frontend Optimization
-```typescript
-// 1. Code splitting
-// 2. Image optimization
-// 3. Lazy loading components
-// 4. API response caching
+### Batch Processing
+When uploading multiple documents, use the batch API:
+```bash
+# Process multiple files efficiently
+POST /api/documents/batch-upload
 ```
 
-### Infrastructure
-- Use SSD storage for ChromaDB
-- Allocate adequate RAM (16GB recommended)
-- Enable GPU acceleration if available
-- Monitor vector database size
+### Vector DB Optimization
+- Regularly clean old vectors: `POST /api/admin/cleanup`
+- Monitor DB size: Check `data/vectordb/`
 
 ---
 
-## 📖 Documentation Resources
+## 📖 Documentation
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Fast setup guide (5 minutes)
-- **[MVP_SNAPSHOT.md](MVP_SNAPSHOT.md)** - Current MVP status
-- **[docs/DOCKER_SETUP.md](docs/DOCKER_SETUP.md)** - Detailed Docker guide
-- **[docs/PHASE_4_SPEC.md](docs/PHASE_4_SPEC.md)** - Phase 4 features
-- **[docs/PHASE_4_PLAN.md](docs/PHASE_4_PLAN.md)** - Implementation plan
+- **[QUICKSTART.md](QUICKSTART.md)** - Fast setup guide
+- **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Detailed project overview
+- **[OFFLINE_MODE.md](OFFLINE_MODE.md)** - Offline operation guide
+- **[docs/PHASE_4_SUMMARY.md](docs/PHASE_4_SUMMARY.md)** - Complete feature summary
+- **[docs/DOCKER_SETUP.md](docs/DOCKER_SETUP.md)** - Docker deployment guide
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Backend Issues
-
-**Backend won't start:**
+### Backend Won't Start
 ```bash
-# Check Python version (requires 3.11+)
+# Check Python version (needs 3.11+)
 python --version
-
-# Verify port availability
-lsof -i :8000  # macOS/Linux
-netstat -ano | findstr :8000  # Windows
 
 # Reinstall dependencies
 pip install -r requirements.txt --force-reinstall
 
-# Check Ollama connection
-curl http://localhost:11434/api/tags
+# Check if port 8000 is in use
+netstat -ano | findstr :8000
 ```
 
-**API returns 500 error:**
-```bash
-# View backend logs
-docker-compose logs backend -f
-
-# Check database
-ls -la data/conversations.db
-
-# Reset database if corrupted
-rm data/conversations.db && python backend/app/database.py
-```
-
-### Frontend Issues
-
-**"Connection refused" error:**
-```bash
-# Verify backend is running
-curl http://localhost:8000/api/v1/health
-
-# Check frontend env
-cat frontend/.env.local
-
-# Rebuild frontend
-cd frontend && npm run build
-```
-
-**High memory usage:**
+### Frontend Shows Connection Error
 ```bash
 # Clear Next.js cache
 rm -rf frontend/.next
 
-# Clear browser cache (Ctrl+Shift+Delete)
+# Reinstall dependencies
+cd frontend && npm install
 
-# Restart containers
-docker-compose restart
+# Verify backend is running: http://localhost:8000/docs
 ```
 
-### Ollama Issues
-
-**Model not loading:**
+### Ollama Not Connecting
 ```bash
-# List available models
-ollama list
-
-# Pull required model
-ollama pull mistral
-ollama pull llama2
-
-# Check Ollama status
+# Check if Ollama is running
 curl http://localhost:11434/api/tags
 
-# Restart Ollama
-docker-compose restart ollama
+# Pull a model if needed
+ollama pull llama3.2
+
+# Restart Ollama service
 ```
 
-**Out of memory:**
-```bash
-# Use smaller model
-ollama pull mistral  # 7B model (lighter)
-
-# Or reduce context window
-OLLAMA_NUM_PREDICT=512  # Limit response length
-```
+### High Memory Usage
+- Use smaller embedding model: `all-MiniLM-L6-v2`
+- Reduce chunk size: `CHUNK_SIZE = 256`
+- Clear cache: `DELETE /api/admin/cache`
 
 ---
 
@@ -834,7 +684,7 @@ We welcome contributions! Help us build the future of equitable AI learning.
 
 ### Getting Started
 1. Fork the repository on GitHub
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/ZenForge.git`
+2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/GuruCortex.git`
 3. Create feature branch: `git checkout -b feature/your-feature`
 4. Make changes and test locally
 5. Commit: `git commit -m 'Add your feature'`
@@ -842,180 +692,112 @@ We welcome contributions! Help us build the future of equitable AI learning.
 7. Open Pull Request with description
 
 ### Development Guidelines
-- Follow PEP 8 (Python) and ESLint (TypeScript) standards
+- Follow existing code style
 - Add tests for new features
 - Update documentation
-- Test in Docker environment
-- Use meaningful commit messages
+- Test in both native and Docker environments
 
-### Contributing Areas
+### Areas for Contribution
 - 🐛 Bug fixes and improvements
-- ✨ New features (Phase 5 and beyond)
-- 📚 Documentation and guides
-- 🎨 UI/UX enhancements
-- 🚀 Performance optimizations
-- 🌍 Localization and translations
-- 🧪 Testing and quality assurance
-- 📊 Analytics and metrics
-
-### Code of Conduct
-Please treat all community members with respect and courtesy.
+- 📚 Documentation enhancement
+- 🎨 UI/UX improvements
+- 🚀 Performance optimization
+- 🌐 Localization support
+- 🧪 Test coverage
+- 🔌 Plugin/extension development
 
 ---
 
 ## 📋 Roadmap
 
-### ✅ Completed
-- Phase 1: RAG Foundation
+### Completed ✅
+- Phase 1: Core RAG Foundation
 - Phase 2: Multimodal Capabilities
 - Phase 3: Conversation Management
 - Phase 4: Assessment & Learning Analytics
-- MVP for Google Solution Challenge 2026
 
-### 🎯 Planned Features
-- Phase 5: Collaborative Learning
-  - Real-time document collaboration
-  - Shared study sessions
-  - Peer review functionality
-  
-- Advanced Analytics
-  - Predictive learning paths
-  - Cohort analysis
-  - Achievement system
-  
-- Mobile Applications
-  - iOS/Android native apps
-  - Offline-first synchronization
-  
-- Extensibility
-  - Plugin system
-  - Custom model support
-  - API webhooks
-  
-- Enterprise Features
-  - Multi-user management
-  - Organization workspaces
-  - Advanced permissions
-  - Audit logging
+### Future Plans 🎯
+- Plugin system for custom features
+- Mobile app (iOS/Android)
+- Advanced visualization tools
+- Collaborative learning features
+- API for third-party integrations
+- Advanced NLP features (entity extraction, sentiment)
+- Support for more file formats
 
 ---
 
-## 📊 Technical Statistics
+## 📊 Project Statistics
 
-| Metric | Value |
-|--------|-------|
-| **Backend Code** | ~3000+ lines (FastAPI/Python) |
-| **Frontend Code** | ~4000+ lines (React/TypeScript) |
-| **Documentation** | 10+ comprehensive guides |
-| **API Endpoints** | 25+ RESTful endpoints |
-| **Supported Models** | 50+ via Ollama |
-| **Document Formats** | 6+ types |
-| **Database Tables** | 10+ SQLite tables |
-| **Services** | 10+ backend microservices |
-| **React Components** | 20+ reusable components |
+- **Backend:** ~2000+ lines of Python/FastAPI code
+- **Frontend:** ~3000+ lines of React/TypeScript code
+- **Documentation:** 10+ comprehensive guides
+- **Supported Models:** 50+ via Ollama
+- **File Types:** 6+ formats supported
+- **API Endpoints:** 20+ RESTful endpoints
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see [LICENSE](LICENSE) for full details.
+This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file for details.
 
-### MIT License Allows
-- ✅ Free use for personal and commercial projects
-- ✅ Modification and distribution
-- ✅ Private use
-
-### MIT License Requires
-- ✅ License and copyright notice in distributions
-- ❌ No liability
-- ❌ No warranty
+### MIT License Summary
+- ✅ Free for personal and commercial use
+- ✅ You can modify and distribute
+- ❌ No liability or warranty provided
+- ✅ Must include license in distributions
 
 ---
 
-## 🙏 Acknowledgments & Credits
+## 🙏 Acknowledgments
 
 ### Built For
-- **Google Solution Challenge 2026** - The organizing event
-- **Global Education Community** - Inspiring equitable learning
+- **AMD Slingshot Hackathon** - The organizing event
+- **Open Source Community** - For amazing libraries and tools
 
-### Core Technologies & Projects
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern REST API framework
-- [Next.js](https://nextjs.org/) - React production framework
+### Key Technologies
+- [FastAPI](https://fastapi.tiangolo.com/) - Modern API framework
+- [Next.js](https://nextjs.org/) - React framework
 - [ChromaDB](https://www.trychroma.com/) - Vector database
 - [Ollama](https://ollama.ai/) - Local LLM platform
-- [LangChain](https://python.langchain.com/) - LLM orchestration framework
-- [sentence-transformers](https://www.sbert.net/) - Embedding models
-- [PyPDF2](https://github.com/py-pdf/PyPDF2) - PDF processing
-- [MediaPipe](https://mediapipe.dev/) - ML framework for vision
+- [LangChain](https://python.langchain.com/) - LLM orchestration
+- [sentence-transformers](https://www.sbert.net/) - Embeddings
 
-### Team ZenForge
-- Paritosh Sharma (Lead Developer)
-- Backend Architecture & RAG
-- Frontend UI/UX
-- DevOps & Deployment
-
-### Community Contributors
-- Open source maintainers
-- Hackathon mentors
-- Early testers and feedback providers
+### Contributors
+- **Team ZenForge** - Project team
+- **Hackathon Organizers** - AMD & event sponsors
 
 ---
 
-## 💬 Support & Communication
+## 💬 Support & Contact
 
-### Get Help
-1. **Read Documentation First:** Check [docs/](docs/) and [QUICKSTART.md](QUICKSTART.md)
-2. **Search Issues:** Look for similar issues on [GitHub Issues](../../issues)
-3. **Create New Issue:** Use templates for bugs or feature requests
-4. **Community Discussion:** Join [GitHub Discussions](../../discussions)
+### Getting Help
+1. **Check Documentation:** See [docs/](docs/) folder first
+2. **Search Issues:** Look for similar problems on GitHub Issues
+3. **Create New Issue:** Describe the problem with steps to reproduce
+4. **Join Community:** Discussions and Q&A in GitHub Discussions
 
-### Report Issues
-When reporting a bug, include:
-- Operating system and version
+### Report a Bug
+Open an issue with:
+- OS and version
 - Python/Node.js version
 - Steps to reproduce
 - Expected vs actual behavior
-- Relevant error messages/logs
-- (Optional) Screenshots
+- Error logs
 
 ### Feature Requests
-Describe:
-- Desired functionality
-- Use case and benefit
-- Suggested implementation approach
-- Related existing features
+Describe the feature and why it would be useful
 
 ---
 
 ## 🎉 Conclusion
 
-**ZenForge** represents a paradigm shift in AI-assisted learning—combining cutting-edge AI capabilities with privacy-first architecture and offline functionality. Our mission is to make equitable, high-quality AI-powered education accessible to everyone, regardless of connectivity or resources.
+GuruCortex represents a new paradigm in AI-assisted learning—combining the power of large language models with the privacy-first approach that users deserve. Whether you're a student, educator, researcher, or lifelong learner, GuruCortex provides the tools to learn smarter, faster, and more safely.
 
-### Our Vision
-Build a learning platform that:
-- Prioritizes user privacy and data sovereignty
-- Works in resource-constrained environments  
-- Provides personalized, effective learning experiences
-- Empowers educators and learners globally
-- Remains completely open and transparent
-
-**Join us on this mission to democratize AI-powered learning.**
+**Join us in building the future of privacy-conscious AI learning.**
 
 ---
-
-## 📞 Quick Links
-
-- GitHub Repository: https://github.com/Paritosh2681/ZenForge
-- Google Solution Challenge: https://solutionchallengegsoc2026.withgoogle.com
-- Ollama Documentation: https://ollama.ai
-- FastAPI Docs: https://fastapi.tiangolo.com
-- Next.js Docs: https://nextjs.org/docs
-
----
-
-**Last Updated:** April 26, 2026
-**Status:** Phase 4 MVP Complete | Ready for Google Solution Challenge
-**License:** MIT
 
 <div align="center">
 
