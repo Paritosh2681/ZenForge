@@ -78,7 +78,7 @@
 | **Computer Vision** | MediaPipe, OpenCV | Attention tracking & image processing |
 | **Speech** | speech-recognition, pyttsx3 | Voice input & TTS |
 | **LLM Inference** | Ollama | Local model serving |
-| | Mistral-7B, Llama-3.2 | Open-source language models |
+| | Google Gemma 4 4B, Llama-3.2 | Open-source language models |
 | **Databases** | SQLite | Conversations, quizzes, analytics |
 | | ChromaDB | Vector embeddings persistence |
 | **DevOps** | Docker, Docker Compose | Containerization & orchestration |
